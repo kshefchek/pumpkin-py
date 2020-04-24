@@ -1,0 +1,10 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX BFO: <http://purl.obolibrary.org/obo/BFO_>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX UPHENO: <http://purl.obolibrary.org/obo/UPHENO_>
+
+SELECT ?sub ?obj
+WHERE {
+    ?sub (rdfs:subClassOf|BFO:0000050|owl:equivalentClass)* UPHENO:0001001 .
+    ?sub (rdfs:subClassOf|BFO:0000050|owl:equivalentClass)* ?obj .
+}

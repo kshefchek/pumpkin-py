@@ -1,3 +1,8 @@
+# Project specific
+resources/annotations
+resources/bin
+resources/closures
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

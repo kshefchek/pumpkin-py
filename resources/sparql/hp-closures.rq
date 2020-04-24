@@ -1,0 +1,10 @@
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX BFO: <http://purl.obolibrary.org/obo/BFO_>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX HP: <http://purl.obolibrary.org/obo/HP_>
+
+SELECT ?sub ?obj
+WHERE {
+    ?sub (rdfs:subClassOf|BFO:0000050|owl:equivalentClass)* HP:0000118 .
+    ?sub (rdfs:subClassOf|BFO:0000050|owl:equivalentClass)* ?obj .
+}

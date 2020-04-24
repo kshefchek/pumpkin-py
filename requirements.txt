@@ -1,0 +1,5 @@
+prefixcommons
+numpy
+pytest
+rdflib
+dataclasses
