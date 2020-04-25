@@ -13,18 +13,17 @@ closures/
     
 annotations/
     Homo_sapiens/Hs_gene_labels.txt  
-	Homo_sapiens/Hs_gene_phenotype.txt  
-	Mus_musculus/Mm_gene_labels.txt  
-	Mus_musculus/Mm_gene_phenotype.txt  
-	Danio_rerio/Dr_gene_labels.txt  
-	Danio_rerio/Dr_gene_phenotype.txt  
-	Drosophila_melanogaster/Dm_gene_labels.txt  
-	Drosophila_melanogaster/Dm_gene_phenotype.txt  
-	Cases/UDP_case_labels.txt  
-	Cases/UDP_case_phenotype.txt  
-	Caenorhabditis_elegans/Ce_gene_labels.txt  
-	Caenorhabditis_elegans/Ce_gene_phenotype.txt
-
+    Homo_sapiens/Hs_gene_phenotype.txt  
+    Mus_musculus/Mm_gene_labels.txt  
+    Mus_musculus/Mm_gene_phenotype.txt  
+    Danio_rerio/Dr_gene_labels.txt  
+    Danio_rerio/Dr_gene_phenotype.txt  
+    Drosophila_melanogaster/Dm_gene_labels.txt  
+    Drosophila_melanogaster/Dm_gene_phenotype.txt  
+    Cases/UDP_case_labels.txt  
+    Cases/UDP_case_phenotype.txt  
+    Caenorhabditis_elegans/Ce_gene_labels.txt  
+    Caenorhabditis_elegans/Ce_gene_phenotype.txt
 
 Generating the metazoa-slim file takes a chunk of memory (>8gb), an alternative
 is downloading from https://archive.monarchinitiative.org/latest/owl/metazoa-slim.owl
