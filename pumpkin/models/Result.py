@@ -25,8 +25,8 @@ class TypedNode(Node):
     Node with type and optional taxon
     """
     type: str
-    label: Optional[str] = None
-    taxon: Optional[Node] = None
+    label: str
+    taxon: Node
 
 
 @dataclass
@@ -39,7 +39,7 @@ class SimMatch(TypedNode):
 
 
 @dataclass
-class SimResult:
+class SearchResult:
     """
     Data class a list of similarity matches
     """

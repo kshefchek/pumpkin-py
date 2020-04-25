@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from typing import Optional, Set, Dict
+from ..utils.math_utils import information_content
 
 
 class Graph(metaclass=ABCMeta):
@@ -8,18 +9,38 @@ class Graph(metaclass=ABCMeta):
     for traversing ancestors, descendants, and storing
     information content about classes
     """
+    root: str
     ic_map: Dict[str, float]
 
-    @abstractmethod
-    def load_ic_map(self):
+    def get_closure(self, node: str, negative: Optional[bool] = False) -> Set[str]:
+        if negative:
+            nodes = self.get_descendants(node)
+        else:
+            nodes = self.get_ancestors(node)
+        return nodes
+
+    def load_ic_map(self, annotations: Dict[str, Set[str]]):
         """
         Initializes ic_map
         """
-        pass
+        explicit_annotations = 0
+        node_annotations = {node: 0 for node in self.get_descendants(self.root)}
+        for profile in annotations.values():
+            for node in profile:
+                explicit_annotations += 1
+                for cls in self.get_ancestors(node):
+                    node_annotations[cls] += 1
 
-    @abstractmethod
-    def get_closure(self, node: str, negative: Optional[bool] = False) -> Set[str]:
-        pass
+        # laplacian smoothing
+        for node, annot_count in node_annotations.items():
+            if annot_count == 0:
+                explicit_annotations += 1
+                for ancestor in self.get_ancestors(node):
+                    node_annotations[ancestor] += 1
+
+        for node, annot_count in node_annotations.items():
+            self.ic_map[node] = information_content(annot_count / explicit_annotations)
+
 
     @abstractmethod
     def get_descendants(self, node: str) -> Set[str]:

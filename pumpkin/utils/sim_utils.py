@@ -8,8 +8,8 @@ def get_mica_ic(
         pheno_b: str,
         graph: Graph
 ) -> float:
-    p1_closure = graph.get_closure(graph, pheno_a)
-    p2_closure = graph.get_closure(graph, pheno_b)
+    p1_closure = graph.get_closure(pheno_a)
+    p2_closure = graph.get_closure(pheno_b)
     return max([graph.ic_map[parent]for parent in p1_closure.intersection(p2_closure)])
 
 
@@ -22,8 +22,8 @@ def get_mica_id(
     Return ID of most informative common anscestor of two phenotypes
     Currently does not handle ambiguity (>1 equal MICAs)
     """
-    p1_closure = graph.get_closure(graph, pheno_a)
-    p2_closure = graph.get_closure(graph, pheno_b)
+    p1_closure = graph.get_closure(pheno_a)
+    p2_closure = graph.get_closure(pheno_b)
     overlap = p1_closure.intersection(p2_closure)
     max_ic = max([graph.ic_map[parent]for parent in overlap])
     mica = ''

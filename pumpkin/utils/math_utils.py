@@ -1,4 +1,4 @@
-from typing import Union, Sized
+from typing import Union, Collection
 from functools import reduce
 import math
 
@@ -7,7 +7,7 @@ import math
 Num = Union[int, float]
 
 
-def geometric_mean(values: Sized[Num]) -> float:
+def geometric_mean(values: Collection[Num]) -> float:
     return reduce(lambda x,y: x*y, values)**(1/(len(values)))
 
 

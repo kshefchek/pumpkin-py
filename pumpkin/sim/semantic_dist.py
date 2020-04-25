@@ -1,6 +1,6 @@
 from typing import Iterable, Dict, List, Union, Optional
 from enum import Enum
-from rdflib import Graph, URIRef, RDFS
+from ..graph.Graph import Graph
 from . import metric, matrix
 from statistics import mean
 from ..utils import sim_utils
@@ -21,18 +21,13 @@ class SemanticDist():
     def __init__(
             self,
             graph: Graph,
-            root: str,
-            ic_map: Dict[str, float]
     ):
         self.graph = graph
-        self.root = root
-        self.ic_map = ic_map
 
     def euclidean_distance(
             self,
             profile_a: Iterable[str],
-            profile_b: Iterable[str],
-            predicate: Optional[URIRef] = RDFS['subClassOf']
+            profile_b: Iterable[str]
     ) -> float:
         """
         Groupwise euclidean distance
@@ -54,9 +49,9 @@ class SemanticDist():
 
         all_phenotypes = a_closure.union(b_closure)
 
-        a_vector = np.array([self.ic_map[item] if
+        a_vector = np.array([self.graph.ic_map[item] if
                              item in a_closure else 0 for item in all_phenotypes])
-        b_vector = np.array([self.ic_map[item] if
+        b_vector = np.array([self.graph.ic_map[item] if
                             item in b_closure else 0 for item in all_phenotypes])
 
         return np.linalg.norm(a_vector - b_vector)
@@ -77,8 +72,6 @@ class SemanticDist():
         Jin Contrath = IC(a) + IC (b) - 2 IC(MICA(a,b))
         Euclidean = sqrt ( pow(IC(a) - MICA, 2) + pow(IC(b) - MICA), 2) )
         """
-        if not isinstance(distance_measure, PairwiseDist):
-            distance_measure = PairwiseDist(distance_measure.lower())
         ab_matrix = self._get_score_matrix(profile_a, profile_b, distance_measure)
         ba_matrix = self._get_score_matrix(profile_b, profile_a, distance_measure)
         return mean(

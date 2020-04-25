@@ -4,7 +4,7 @@ import math
 from statistics import mean
 from . import metric, matrix
 from ..utils import sim_utils, math_utils
-from ..graph import Graph
+from ..graph.Graph import Graph
 
 
 # Union types
@@ -23,15 +23,13 @@ class MatrixMetric(Enum):
     BMA = 'bma'  # Best Match Average
 
 
-class SemanticSim():
+class SemanticSim:
 
     def __init__(
             self,
             graph: Graph,
-            ic_map: Dict[str, float]
     ):
         self.graph = graph
-        self.ic_map = ic_map
 
     def sim_gic(
             self,
@@ -55,10 +53,10 @@ class SemanticSim():
             profile_b, self.graph)
 
         numerator = sum(
-            [self.ic_map[pheno] for pheno in a_closure.intersection(b_closure)]
+            [self.graph.ic_map[pheno] for pheno in a_closure.intersection(b_closure)]
         )
         denominator = sum(
-            [self.ic_map[pheno] for pheno in a_closure.union(b_closure)]
+            [self.graph.ic_map[pheno] for pheno in a_closure.union(b_closure)]
         )
 
         return numerator/denominator
@@ -94,10 +92,10 @@ class SemanticSim():
                 )
 
         numerator = sum(
-            [self.ic_map[pheno] for pheno in profile_intersection]
+            [self.graph.ic_map[pheno] for pheno in profile_intersection]
         )
         denominator = sum(
-            [self.ic_map[pheno] for pheno in profile_union]
+            [self.graph.ic_map[pheno] for pheno in profile_union]
         )
 
         return numerator/denominator
@@ -158,7 +156,7 @@ class SemanticSim():
         """
         def score(term):
             if ic_weighted:
-                attribute = self.ic_map[term]
+                attribute = self.graph.ic_map[term]
             else:
                 attribute = 1
             return attribute
@@ -267,9 +265,6 @@ class SemanticSim():
         profile_a = {pheno for pheno in profile_a if not pheno.startswith("-")}
         profile_b = {pheno for pheno in profile_b if not pheno.startswith("-")}
 
-        if not isinstance(matrix_metric, MatrixMetric):
-            matrix_metric = MatrixMetric(matrix_metric.lower())
-
         sim_measure = PairwiseSim.IC
 
         query_matrix = self._get_score_matrix(
@@ -352,9 +347,6 @@ class SemanticSim():
         profile_a = {pheno for pheno in profile_a if not pheno.startswith("-")}
         profile_b = {pheno for pheno in profile_b if not pheno.startswith("-")}
 
-        if not isinstance(sim_measure, PairwiseSim):
-            sim_measure = PairwiseSim(sim_measure.lower())
-
         query_matrix = self._get_score_matrix(profile_a, profile_b, sim_measure)
         if is_same_species:
             optimal_matrix = self._get_optimal_matrix(
@@ -421,9 +413,9 @@ class SemanticSim():
             for pheno in profile:
                 if sim_measure == PairwiseSim.GEOMETRIC:
                     score_matrix.append(
-                        [math_utils.geometric_mean([1, self.ic_map[pheno]])])
+                        [math_utils.geometric_mean([1, self.graph.ic_map[pheno]])])
                 elif sim_measure == PairwiseSim.IC:
-                    score_matrix.append([self.ic_map[pheno]])
+                    score_matrix.append([self.graph.ic_map[pheno]])
                 else:
                     raise NotImplementedError
         else:

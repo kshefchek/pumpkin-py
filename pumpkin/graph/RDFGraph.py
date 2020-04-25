@@ -2,7 +2,7 @@ from rdflib import URIRef, BNode, Literal, RDFS, util
 from rdflib import Graph as RDFLibGraph
 from typing import Optional, Set
 from prefixcommons import contract_uri, expand_uri
-from . import Graph
+from .Graph import Graph
 
 
 class RDFGraph(Graph):
@@ -16,28 +16,22 @@ class RDFGraph(Graph):
 
     def __init__(
             self,
+            root: str,
             iri: str,
-            root: Optional[str] = None,
             edge: Optional[URIRef]=RDFS['subClassOf']
     ):
-        self.graph = RDFLibGraph.load(iri, format=util.guess_format(iri))
+        self.graph = RDFLibGraph()
         self.root = root
         self.edge = edge
         self.ic_map = {}
-
-    def get_closure(
-            self,
-            node: str,
-            negative: Optional[bool] = False
-    ) -> Set[str]:
-        nodes = set()
-        if negative:
-            nodes = self.get_descendants(node)
-        else:
-            nodes = self.get_ancestors(node)
-        return nodes
+        self.graph.load(iri, format=util.guess_format(iri))
 
     def get_ancestors(self, node: str) -> Set[str]:
+        """
+        Reflexive get_ancestors
+        :param node:
+        :return:
+        """
         nodes = set()
         root_seen = {}
         node = URIRef(expand_uri(node, strict=True))
@@ -52,7 +46,7 @@ class RDFGraph(Graph):
 
         # Add root to graph
         if self.root is not None:
-            nodes.add(contract_uri(str(self.root), strict=True)[0])
+            nodes.add(self.root)
 
         return nodes
 
