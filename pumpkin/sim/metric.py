@@ -1,4 +1,4 @@
-from typing import Set, Union
+from typing import AbstractSet, Union
 from ..utils.math_utils import geometric_mean
 from ..utils.sim_utils import get_mica_ic
 from ..graph import Graph
@@ -9,7 +9,7 @@ import math
 Num = Union[int, float]
 
 
-def jaccard(set1: Set, set2: Set) -> float:
+def jaccard(set1: AbstractSet, set2: AbstractSet) -> float:
     return len(set1.intersection(set2))/len(set1.union(set2))
 
 
@@ -29,8 +29,8 @@ def pairwise_euclidean(
     sqrt ( pow(IC(a) - MICA, 2) + pow(IC(b) - MICA), 2) )
     """
     max_ic = get_mica_ic(pheno_a, pheno_b, graph)
-    ic_a = graph.ic_map[pheno_a]
-    ic_b = graph.ic_map[pheno_b]
+    ic_a = graph.get_ic(pheno_a)
+    ic_b = graph.get_ic(pheno_b)
     return math.sqrt(math.pow(ic_a - max_ic, 2) + math.pow(ic_b - max_ic, 2))
 
 
@@ -45,8 +45,8 @@ def jin_conrath_distance(
     IC(a) + IC (b) - 2 IC(MICA(a,b))
     """
     max_ic = get_mica_ic(pheno_a, pheno_b, graph)
-    ic_a = graph.ic_map[pheno_a]
-    ic_b = graph.ic_map[pheno_b]
+    ic_a = graph.get_ic(pheno_a)
+    ic_b = graph.get_ic(pheno_b)
     return ic_a + ic_b - 2 * max_ic
 
 
