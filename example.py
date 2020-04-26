@@ -32,7 +32,17 @@ profile_a = "HP:0000403,HP:0000518,HP:0000565,HP:0000767," \
 profile_b = "HP:0000496,HP:0005257,HP:0008773,HP:0010307," \
             "HP:0100017,HP:0001249".split(',')
 
-print("comparisons")
-print(timeit.timeit(stmt="semantic_sim.phenodigm_compare(profile_a, profile_b)", globals=globals(), number=10000))
+print('phenodigm: ', timeit.timeit(
+    stmt="semantic_sim.phenodigm_compare(profile_a, profile_b)",
+    globals=globals(),
+    number=10000)
+)
+
+print('jaccard: ', timeit.timeit(
+    stmt="semantic_sim.jaccard_sim(profile_a, profile_b)",
+    globals=globals(),
+    number=10000)
+)
 
 print(semantic_sim.phenodigm_compare(profile_a, profile_b))
+print(semantic_sim.jaccard_sim(profile_a, profile_b))

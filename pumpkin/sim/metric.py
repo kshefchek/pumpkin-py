@@ -1,4 +1,4 @@
-from typing import AbstractSet, Union
+from typing import Set, Union
 from ..utils.math_utils import geometric_mean
 from ..utils.sim_utils import get_mica_ic
 from ..graph import Graph
@@ -9,7 +9,7 @@ import math
 Num = Union[int, float]
 
 
-def jaccard(set1: AbstractSet, set2: AbstractSet) -> float:
+def jaccard(set1: Set, set2: Set) -> float:
     return len(set1.intersection(set2))/len(set1.union(set2))
 
 

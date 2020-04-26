@@ -44,7 +44,6 @@ class Graph(metaclass=ABCMeta):
                 for cls in self.get_ancestors(node):
                     node_annotations[cls] += 1
 
-
         # laplacian smoothing
         for node, annot_count in node_annotations.items():
             if annot_count == 0:
