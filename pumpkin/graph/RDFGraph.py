@@ -1,6 +1,7 @@
 from rdflib import URIRef, BNode, Literal, RDFS, util
 from rdflib import Graph as RDFLibGraph
 from typing import Optional, Set
+from pyroaring import BitMap
 from .Graph import Graph
 
 
@@ -24,8 +25,19 @@ class RDFGraph(Graph):
         self.edge = edge
         self.ic_map = {}
         self.graph.load(iri, format=util.guess_format(iri))
+        self.id_map = {}
+        id = 1
+        for node in self._get_descendants(root):
+            self.id_map[node] = id
+            id += 1
 
-    def get_ancestors(self, node: str) -> Set[str]:
+    def get_ancestors(self, node: str) -> BitMap:
+        return BitMap([self.id_map[node] for node in self._get_ancestors(node)])
+
+    def get_descendants(self, node: str) -> BitMap:
+        return BitMap([self.id_map[node] for node in self._get_descendants(node)])
+
+    def _get_ancestors(self, node: str) -> Set[str]:
         """
         Reflexive get_ancestors
         :param node:
@@ -49,7 +61,7 @@ class RDFGraph(Graph):
 
         return nodes
 
-    def get_descendants(self, node: str) -> Set[str]:
+    def _get_descendants(self, node: str) -> Set[str]:
         nodes = set()
         node = URIRef("http://purl.obolibrary.org/obo/" + node.replace(":", "_"))
         for sub in self.graph.transitive_subjects(self.edge, node):

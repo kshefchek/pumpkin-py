@@ -263,7 +263,7 @@ class SemanticSim:
             profile_b: Iterable[str],
             is_symmetric: Optional[bool]=False,
             is_same_species: Optional[bool]=True,
-            sim_measure: Union[PairwiseSim, str, None]= PairwiseSim.GEOMETRIC
+            sim_measure: Optional[PairwiseSim]= PairwiseSim.GEOMETRIC
     ) -> float:
         """
         Phenodigm algorithm:
@@ -311,7 +311,7 @@ class SemanticSim:
             self,
             profile_a: Iterable[str],
             profile_b: Iterable[str],
-            sim_measure: Union[PairwiseSim, None] = PairwiseSim.IC
+            sim_measure: Optional[PairwiseSim] = PairwiseSim.IC
     ) -> List[List[float]]:
 
         score_matrix = [[]]
@@ -449,9 +449,9 @@ class SemanticSim:
             for pheno in profile:
                 if sim_measure == PairwiseSim.GEOMETRIC:
                     score_matrix.append(
-                        [math_utils.geometric_mean([1, self.graph.ic_map[pheno]])])
+                        [math_utils.geometric_mean([1, self.graph.get_ic(pheno)])])
                 elif sim_measure == PairwiseSim.IC:
-                    score_matrix.append([self.graph.ic_map[pheno]])
+                    score_matrix.append([self.graph.get_ic(pheno)])
                 else:
                     raise NotImplementedError
         else:

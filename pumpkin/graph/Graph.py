@@ -1,18 +1,28 @@
 from abc import ABCMeta, abstractmethod
 from typing import Optional, Set, Dict
+from pyroaring import BitMap
 from ..utils.math_utils import information_content
 
 
 class Graph(metaclass=ABCMeta):
     """
-    Interface for a graph object that contains methods
-    for traversing ancestors, descendants, and storing
+    Interface for an graph object where classes are integer encoded
+    and contains methods for traversing ancestors, descendants, and storing
     information content about classes
     """
     root: str
-    ic_map: Dict[str, float]
+    ic_map: Dict[int, float]
+    id_map: Dict[str, int]
 
-    def get_closure(self, node: str, negative: Optional[bool] = False) -> Set[str]:
+    @abstractmethod
+    def get_descendants(self, node: str) -> BitMap:
+        pass
+
+    @abstractmethod
+    def get_ancestors(self,  node: str) -> BitMap:
+        pass
+
+    def get_closure(self, node: str, negative: Optional[bool] = False) -> BitMap:
         if negative:
             nodes = self.get_descendants(node)
         else:
@@ -24,7 +34,10 @@ class Graph(metaclass=ABCMeta):
         Initializes ic_map
         """
         explicit_annotations = 0
-        node_annotations = {node: 0 for node in self.get_descendants(self.root)}
+        node_annotations = {
+            node: 0
+            for node in self.get_descendants(self.root)
+        }
         for profile in annotations.values():
             for node in profile:
                 explicit_annotations += 1
@@ -41,11 +54,5 @@ class Graph(metaclass=ABCMeta):
         for node, annot_count in node_annotations.items():
             self.ic_map[node] = information_content(annot_count / explicit_annotations)
 
-
-    @abstractmethod
-    def get_descendants(self, node: str) -> Set[str]:
-        pass
-
-    @abstractmethod
-    def get_ancestors(self,  node: str) -> Set[str]:
-        pass
+    def get_ic(self, node: str) -> float:
+        return self.ic_map[self.id_map[node]]

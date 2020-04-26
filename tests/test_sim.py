@@ -45,9 +45,9 @@ class TestSemanticWithCacheGraph():
         root = "HP:0000118"
 
         with open(closures, 'r') as closure_file:
-            ancestors, descendants = flat_to_graph(closure_file, root)
+            id_map, ancestors, descendants = flat_to_graph(closure_file, root)
 
-        self.graph = CacheGraph(root, ancestors, descendants)
+        self.graph = CacheGraph(root, id_map, ancestors, descendants)
 
         with open(annotations, 'r') as annot_file:
             self.annot_map = flat_to_annotations(annot_file)
