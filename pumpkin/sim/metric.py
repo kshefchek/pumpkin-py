@@ -1,16 +1,17 @@
-from typing import Set, Union
+from typing import Union
 from ..utils.math_utils import geometric_mean
 from ..utils.sim_utils import get_mica_ic
 from ..graph import Graph
 import math
+from pyroaring import BitMap
 
 
 # Union type for numbers
 Num = Union[int, float]
 
 
-def jaccard(set1: Set, set2: Set) -> float:
-    return len(set1.intersection(set2))/len(set1.union(set2))
+def jaccard(set1: BitMap, set2: BitMap) -> float:
+    return set1.jaccard_index(set2)
 
 
 def pairwise_jaccard(pheno_a: str, pheno_b: str, graph: Graph) -> float:

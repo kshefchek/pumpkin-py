@@ -1,5 +1,4 @@
 from typing import Optional, Iterable
-from itertools import chain
 from pyroaring import BitMap
 from ..graph import Graph
 
@@ -44,9 +43,7 @@ def get_profile_closure(
     stored in a single set.  This can be used for jaccard similarity or
     simGIC
     """
-    return BitMap(
-        chain.from_iterable(
-            [graph.get_closure(node, negative=negative)
-             for node in profile]
-        )
+    return BitMap.union(
+        *[graph.get_closure(node, negative=negative)
+          for node in profile]
     )
