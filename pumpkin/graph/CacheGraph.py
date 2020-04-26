@@ -2,7 +2,7 @@ from typing import Set, Dict
 from .Graph import Graph
 
 
-class RDFGraph(Graph):
+class CacheGraph(Graph):
     """
     RDFLib based graph implementation
 
@@ -17,6 +17,7 @@ class RDFGraph(Graph):
             ancestors: Dict[str, Set[str]],
             descendants: Dict[str, Set[str]]
     ):
+        self.root = root
         self.ancestors = ancestors
         self.descendants = descendants
         self.ic_map = {}
@@ -36,9 +37,3 @@ class RDFGraph(Graph):
             # TODO handle
             nodes = set()
         return nodes
-
-    def load_ic_map(self):
-        """
-        Initializes ic_map
-        """
-        raise NotImplementedError

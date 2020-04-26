@@ -1,4 +1,3 @@
-prefixcommons
 numpy
 pytest
 rdflib

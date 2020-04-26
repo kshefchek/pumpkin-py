@@ -1,7 +1,6 @@
 from rdflib import URIRef, BNode, Literal, RDFS, util
 from rdflib import Graph as RDFLibGraph
 from typing import Optional, Set
-from prefixcommons import contract_uri, expand_uri
 from .Graph import Graph
 
 
@@ -34,15 +33,15 @@ class RDFGraph(Graph):
         """
         nodes = set()
         root_seen = {}
-        node = URIRef(expand_uri(node, strict=True))
+        node = URIRef("http://purl.obolibrary.org/obo/" + node.replace(":", "_"))
 
         if self.root is not None:
-            root = URIRef(expand_uri(self.root, strict=True))
+            root = URIRef("http://purl.obolibrary.org/obo/" + self.root.replace(":", "_"))
             root_seen = {root: 1}
         for obj in self.graph.transitive_objects(node, self.edge, root_seen):
             if isinstance(obj, Literal) or isinstance(obj, BNode):
                 continue
-            nodes.add(contract_uri(str(obj), strict=True)[0])
+            nodes.add(str(obj).replace("http://purl.obolibrary.org/obo/", "").replace("_", ":"))
 
         # Add root to graph
         if self.root is not None:
@@ -52,9 +51,9 @@ class RDFGraph(Graph):
 
     def get_descendants(self, node: str) -> Set[str]:
         nodes = set()
-        node = URIRef(expand_uri(node, strict=True))
+        node = URIRef("http://purl.obolibrary.org/obo/" + node.replace(":", "_"))
         for sub in self.graph.transitive_subjects(self.edge, node):
             if isinstance(sub, Literal):
                 continue
-            nodes.add(contract_uri(str(sub), strict=True)[0])
+            nodes.add(str(sub).replace("http://purl.obolibrary.org/obo/", "").replace("_", ":"))
         return nodes

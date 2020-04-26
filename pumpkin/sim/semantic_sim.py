@@ -1,4 +1,4 @@
-from typing import Iterable, Dict, List, Union, Optional
+from typing import Iterable, List, Union, Optional
 from enum import Enum
 import math
 from statistics import mean
@@ -42,6 +42,9 @@ class SemanticSim:
         information content of all ancestors in profile a and profile b
         https://bmcbioinformatics.biomedcentral.com/track/
         pdf/10.1186/1471-2105-9-S5-S4
+
+        Equivalent to jaccard if you were to replace 0s and 1s with
+        information content
         """
         # Filter out negative phenotypes
         profile_a = {pheno for pheno in profile_a if not pheno.startswith("-")}
@@ -61,83 +64,13 @@ class SemanticSim:
 
         return numerator/denominator
 
-    def groupwise_sim_gic(
-            self,
-            profiles: Iterable[Iterable[str]]
-    ) -> float:
-        """
-        Groupwise groupwise resnik similarity
-        assumes no negative phenotypes
-        """
-        # Filter out negative phenotypes
-        profile_union = set()
-        profile_intersection = set()
-
-        is_first = True
-        for profile in profiles:
-            profile_union = profile_union.union(
-                sim_utils.get_profile_closure(
-                    profile, self.graph)
-            )
-            if is_first:
-                profile_intersection = sim_utils.get_profile_closure(
-                    profile, self.graph
-                )
-                is_first = False
-            else:
-                profile_intersection = profile_intersection.intersection(
-                    sim_utils.get_profile_closure(
-                        profile, self.graph
-                    )
-                )
-
-        numerator = sum(
-            [self.graph.ic_map[pheno] for pheno in profile_intersection]
-        )
-        denominator = sum(
-            [self.graph.ic_map[pheno] for pheno in profile_union]
-        )
-
-        return numerator/denominator
-
-    def groupwise_jaccard(
-            self,
-            profiles: Iterable[Iterable[str]]
-    ) -> float:
-        """
-        Groupwise groupwise resnik similarity
-        assumes no negative phenotypes
-        """
-        # Filter out negative phenotypes
-        profile_union = set()
-        profile_intersection = set()
-
-        is_first = True
-        for profile in profiles:
-            profile_union = profile_union.union(
-                sim_utils.get_profile_closure(
-                    profile, self.graph)
-            )
-            if is_first:
-                profile_intersection = sim_utils.get_profile_closure(
-                    profile, self.graph
-                )
-                is_first = False
-            else:
-                profile_intersection = profile_intersection.intersection(
-                    sim_utils.get_profile_closure(
-                        profile, self.graph
-                    )
-                )
-
-        return len(profile_intersection)/len(profile_union)
 
     def cosine_sim(
             self,
             profile_a: Iterable[str],
             profile_b: Iterable[str],
             ic_weighted: Optional[bool] = False,
-            negative_weight: Optional[Num] = 1,
+            negative_weight: Optional[Num] = .1,
     ) -> float:
         """
         Cosine similarity
@@ -292,8 +225,8 @@ class SemanticSim:
 
         return resnik_score
 
+    @staticmethod
     def _compute_resnik_score(
-            self,
             query_matrix: List[List[float]],
             optimal_matrix: Optional[List[List[float]]] = None,
             matrix_metric: Optional[MatrixMetric] = MatrixMetric.BMA
@@ -398,6 +331,109 @@ class SemanticSim:
                     sim_fn(pheno_a, pheno_b, self.graph)
                 )
         return score_matrix
+
+    def symmetric_resnik_bma(
+            self,
+            profile_a: Iterable[str],
+            profile_b: Iterable[str]
+    ) -> float:
+        return self.resnik_sim(profile_a, profile_b, is_symmetric=True)
+
+    def cosine_ic(
+            self,
+            profile_a: Iterable[str],
+            profile_b: Iterable[str],
+            negative_weight: Optional[Num] = .1,
+    ) -> float:
+        return self.cosine_sim(profile_a, profile_b, True, negative_weight)
+
+    def symmetric_phenodigm(
+            self,
+            profile_a: Iterable[str],
+            profile_b: Iterable[str],
+            is_same_species: Optional[bool] = True,
+            sim_measure: Union[PairwiseSim, str, None] = PairwiseSim.GEOMETRIC
+    ) -> float:
+        return self.phenodigm_compare(
+            profile_a, profile_b, True, is_same_species, sim_measure
+        )
+
+    def groupwise_sim_gic(
+            self,
+            profiles: Iterable[Iterable[str]]
+    ) -> float:
+        """
+        sim_gic applied to greater than 2 profiles,
+        ie groupwise similarity instead of pairwise
+
+        Useful for quantifying the strength of a cluster of
+        profiles (eg disease clustering)
+        """
+        # Filter out negative phenotypes
+        profile_union = set()
+        profile_intersection = set()
+
+        is_first = True
+        for profile in profiles:
+            profile_union = profile_union.union(
+                sim_utils.get_profile_closure(
+                    profile, self.graph)
+            )
+            if is_first:
+                profile_intersection = sim_utils.get_profile_closure(
+                    profile, self.graph
+                )
+                is_first = False
+            else:
+                profile_intersection = profile_intersection.intersection(
+                    sim_utils.get_profile_closure(
+                        profile, self.graph
+                    )
+                )
+
+        numerator = sum(
+            [self.graph.ic_map[pheno] for pheno in profile_intersection]
+        )
+        denominator = sum(
+            [self.graph.ic_map[pheno] for pheno in profile_union]
+        )
+
+        return numerator/denominator
+
+    def groupwise_jaccard(
+            self,
+            profiles: Iterable[Iterable[str]]
+    ) -> float:
+        """
+        jaccard similarity applied to greater than 2 profiles,
+        ie groupwise similarity instead of pairwise
+
+        Useful for quantifying the strength of a cluster of
+        profiles (eg disease clustering)
+        """
+        # Filter out negative phenotypes
+        profile_union = set()
+        profile_intersection = set()
+
+        is_first = True
+        for profile in profiles:
+            profile_union = profile_union.union(
+                sim_utils.get_profile_closure(
+                    profile, self.graph)
+            )
+            if is_first:
+                profile_intersection = sim_utils.get_profile_closure(
+                    profile, self.graph
+                )
+                is_first = False
+            else:
+                profile_intersection = profile_intersection.intersection(
+                    sim_utils.get_profile_closure(
+                        profile, self.graph
+                    )
+                )
+
+        return len(profile_intersection)/len(profile_union)
 
     def _get_optimal_matrix(
             self,
