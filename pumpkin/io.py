@@ -1,6 +1,8 @@
-from typing import Dict, Set, Tuple, TextIO
-from pyroaring import BitMap
+from typing import Dict, Set, Tuple, TextIO, Optional
+from collections import OrderedDict
+from pyroaring import FrozenBitMap
 import csv
+from pumpkin.graph.CacheGraph import CacheGraph
 
 
 def flat_to_annotations(file: TextIO) -> Dict[str, Set[str]]:
@@ -24,15 +26,18 @@ def flat_to_annotations(file: TextIO) -> Dict[str, Set[str]]:
 
 def flat_to_graph(
         file: TextIO,
-        root: str
-) -> Tuple[Dict[str, int], Dict[str, BitMap], Dict[str, BitMap]]:
+        root: str,
+        annotations: Optional[Dict[str, Set[str]]] = None
+) -> Tuple[Dict[str, int], Dict[str, FrozenBitMap], Dict[str, FrozenBitMap]]:
     """
     Convert a two column file to map of ancestors and desecendants
     :param file: text I/O stream such as returned by open()
     :param root: root class as  curie formatted string
+    :param annotations
+
     :return: Tuple(id_map, ancestors, descendants)
              an id_map of shape Dict[str, int]
-             and two maps with shapes: Dict[str, BitMap]
+             and two maps with shapes: Dict[str, FrozenBitMap]
     """
     ancestors = {}
     descendants = {}
@@ -60,16 +65,33 @@ def flat_to_graph(
     for node in ancestors.keys():
         ancestors[node] = descendants[root] & ancestors[node]
 
-    # Int encode
-    id = 1
-    for node in descendants[root]:
-        id_map[node] = id
-        id += 1
+    # If annotations were passed sort the bitmap by IC
+    if annotations:
+        graph = CacheGraph(root, id_map, ancestors, descendants)
+        graph.load_ic_map(annotations)
+
+        # Sort ascending by IC for int encoding
+        sorted_ic_map = OrderedDict(
+            sorted(
+                [(cls, ic) for cls, ic in graph.ic_map.items()],
+                key=lambda x: x[1]
+            )
+        )
+        id = 1
+        for node in sorted_ic_map.keys():
+            id_map[node] = id
+            id += 1
+    else:
+        # Int encode
+        id = 1
+        for node in descendants[root]:
+            id_map[node] = id
+            id += 1
 
     for node in ancestors.keys():
-        ancestors[node] = BitMap([id_map[node] for node in ancestors[node]])
+        ancestors[node] = FrozenBitMap([id_map[node] for node in ancestors[node]])
 
     for node in descendants.keys():
-        descendants[node] = BitMap([id_map[node] for node in descendants[node]])
+        descendants[node] = FrozenBitMap([id_map[node] for node in descendants[node]])
 
     return id_map, ancestors, descendants

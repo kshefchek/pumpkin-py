@@ -1,7 +1,7 @@
 from rdflib import URIRef, BNode, Literal, RDFS, util
 from rdflib import Graph as RDFLibGraph
 from typing import Optional, Set
-from pyroaring import BitMap
+from pyroaring import FrozenBitMap
 from .Graph import Graph
 
 
@@ -25,17 +25,18 @@ class RDFGraph(Graph):
         self.edge = edge
         self.ic_map = {}
         self.graph.load(iri, format=util.guess_format(iri))
+        self.is_ordered = False
         self.id_map = {}
         id = 1
         for node in self._get_descendants(root):
             self.id_map[node] = id
             id += 1
 
-    def get_ancestors(self, node: str) -> BitMap:
-        return BitMap([self.id_map[node] for node in self._get_ancestors(node)])
+    def get_ancestors(self, node: str) -> FrozenBitMap:
+        return FrozenBitMap([self.id_map[node] for node in self._get_ancestors(node)])
 
-    def get_descendants(self, node: str) -> BitMap:
-        return BitMap([self.id_map[node] for node in self._get_descendants(node)])
+    def get_descendants(self, node: str) -> FrozenBitMap:
+        return FrozenBitMap([self.id_map[node] for node in self._get_descendants(node)])
 
     def _get_ancestors(self, node: str) -> Set[str]:
         """

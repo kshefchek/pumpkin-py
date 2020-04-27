@@ -10,7 +10,16 @@ def get_mica_ic(
 ) -> float:
     p1_closure = graph.get_closure(pheno_a)
     p2_closure = graph.get_closure(pheno_b)
-    return max([graph.ic_map[parent] for parent in p1_closure.intersection(p2_closure)])
+    intersect = p1_closure.intersection(p2_closure)
+    if graph.is_ordered:
+        mica = graph.ic_map[intersect.max()] if intersect else 0
+    else:
+        mica = max(
+            [graph.ic_map[parent] for parent in p1_closure.intersection(p2_closure)],
+            default=0
+        )
+
+    return mica
 
 
 def get_mica_id(

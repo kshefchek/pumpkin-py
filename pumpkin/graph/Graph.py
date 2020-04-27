@@ -13,6 +13,7 @@ class Graph(metaclass=ABCMeta):
     root: str
     ic_map: Dict[int, float]
     id_map: Dict[str, int]
+    is_ordered: bool
 
     @abstractmethod
     def get_descendants(self, node: str) -> BitMap:
@@ -40,9 +41,12 @@ class Graph(metaclass=ABCMeta):
         }
         for profile in annotations.values():
             for node in profile:
-                explicit_annotations += 1
+                has_ancestors = False
                 for cls in self.get_ancestors(node):
                     node_annotations[cls] += 1
+                    has_ancestors = True
+                if has_ancestors:
+                    explicit_annotations += 1
 
         # laplacian smoothing
         for node, annot_count in node_annotations.items():
