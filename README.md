@@ -1,12 +1,15 @@
-PumpkinPy (likely to be renamed) - PhenoDigm implemented in python
+PumpkinPy (likely to be renamed) - Semantic similarity implemented in python
 
-##### Background
+##### Getting Started
 
-A python implementation for PhenoDigm and other semantic similarity methods.
+Requires python 3.8, which includes a fast geometric mean function
+in the standard statistics package
 
-This started as a [gist](https://gist.github.com/kshefchek/dc9324023f9cc54333298658e1f9f49e)
-then ended up being used to analyze the
-[lay subset of the HPO](https://github.com/monarch-initiative/hpo-survey-analysis/tree/master/phenom/similarity).
+ ```
+python3.8 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
 
 ###### Fetching annotations and closures
 

@@ -1,9 +1,10 @@
 from typing import Iterable, List, Union, Optional
 from enum import Enum
 import math
-from statistics import mean
+from statistics import mean, geometric_mean
+from pyroaring import BitMap
 from . import metric, matrix
-from ..utils import sim_utils, math_utils
+from ..utils import sim_utils
 from ..graph.Graph import Graph
 
 
@@ -108,12 +109,12 @@ class SemanticSim:
         neg_a_closure = {"-{}".format(item)
                          for item in sim_utils.get_profile_closure(
             negative_a_profile, self.graph, negative=True)
-                         }
+                         } if negative_a_profile else set()
 
         neg_b_closure = {"-{}".format(item)
                          for item in sim_utils.get_profile_closure(
             negative_b_profile, self.graph, negative=True)
-                         }
+                         } if negative_b_profile else set()
 
         pos_intersect_dot_product = sum(
             [math.pow(score(item), 2)
@@ -148,7 +149,12 @@ class SemanticSim:
         numerator = pos_intersect_dot_product + neg_intersect_dot_product
         denominator = a_square_dot_product * b_square_dot_product
 
-        return numerator / denominator
+        try:
+            result = numerator / denominator
+        except ZeroDivisionError:
+            result = 0
+
+        return result
 
     def jaccard_sim(
             self,
@@ -307,14 +313,12 @@ class SemanticSim:
             [matrix.max_percentage_score(query_matrix, optimal_matrix),
              matrix.sym_bma_percentage_score(query_matrix, optimal_matrix)])
 
-    def _get_score_matrix(
+    def _make_row(
             self,
-            profile_a: Iterable[str],
-            profile_b: Iterable[str],
-            sim_measure: Optional[PairwiseSim] = PairwiseSim.IC
-    ) -> List[List[float]]:
-
-        score_matrix = [[]]
+            pheno_a: str,
+            profile_b: Iterable,
+            sim_measure: PairwiseSim = PairwiseSim.IC
+    )-> List[float]:
 
         if sim_measure == PairwiseSim.GEOMETRIC:
             sim_fn = metric.jac_ic_geomean
@@ -323,14 +327,17 @@ class SemanticSim:
         else:
             raise NotImplementedError
 
-        for index, pheno_a in enumerate(profile_a):
-            if index == len(score_matrix):
-                score_matrix.append([])
-            for pheno_b in profile_b:
-                score_matrix[index].append(
-                    sim_fn(pheno_a, pheno_b, self.graph)
-                )
-        return score_matrix
+        return [sim_fn(pheno_a, pheno_b, self.graph) for pheno_b in profile_b]
+
+    def _get_score_matrix(
+            self,
+            profile_a: Iterable[str],
+            profile_b: Iterable[str],
+            sim_measure: PairwiseSim = PairwiseSim.IC
+    ) -> List[List[float]]:
+
+        return [self._make_row(pheno_a, profile_b, sim_measure)
+                for pheno_a in profile_a]
 
     def symmetric_resnik_bma(
             self,
@@ -370,26 +377,15 @@ class SemanticSim:
         profiles (eg disease clustering)
         """
         # Filter out negative phenotypes
-        profile_union = set()
-        profile_intersection = set()
 
-        is_first = True
-        for profile in profiles:
-            profile_union = profile_union.union(
-                sim_utils.get_profile_closure(
-                    profile, self.graph)
-            )
-            if is_first:
-                profile_intersection = sim_utils.get_profile_closure(
-                    profile, self.graph
-                )
-                is_first = False
-            else:
-                profile_intersection = profile_intersection.intersection(
-                    sim_utils.get_profile_closure(
-                        profile, self.graph
-                    )
-                )
+        profile_union = BitMap.union(
+                *[sim_utils.get_profile_closure(
+                    profile, self.graph) for profile in profiles]
+        )
+        profile_intersection = BitMap.intersection(
+            *[sim_utils.get_profile_closure(
+                profile, self.graph) for profile in profiles]
+        )
 
         numerator = sum(
             [self.graph.ic_map[pheno] for pheno in profile_intersection]
@@ -412,26 +408,15 @@ class SemanticSim:
         profiles (eg disease clustering)
         """
         # Filter out negative phenotypes
-        profile_union = set()
-        profile_intersection = set()
 
-        is_first = True
-        for profile in profiles:
-            profile_union = profile_union.union(
-                sim_utils.get_profile_closure(
-                    profile, self.graph)
-            )
-            if is_first:
-                profile_intersection = sim_utils.get_profile_closure(
-                    profile, self.graph
-                )
-                is_first = False
-            else:
-                profile_intersection = profile_intersection.intersection(
-                    sim_utils.get_profile_closure(
-                        profile, self.graph
-                    )
-                )
+        profile_union = BitMap.union(
+            *[sim_utils.get_profile_closure(
+                profile, self.graph) for profile in profiles]
+        )
+        profile_intersection = BitMap.intersection(
+            *[sim_utils.get_profile_closure(
+                profile, self.graph) for profile in profiles]
+        )
 
         return len(profile_intersection)/len(profile_union)
 
@@ -449,7 +434,7 @@ class SemanticSim:
             for pheno in profile:
                 if sim_measure == PairwiseSim.GEOMETRIC:
                     score_matrix.append(
-                        [math_utils.geometric_mean([1, self.graph.get_ic(pheno)])])
+                        [geometric_mean([1, self.graph.get_ic(pheno)])])
                 elif sim_measure == PairwiseSim.IC:
                     score_matrix.append([self.graph.get_ic(pheno)])
                 else:

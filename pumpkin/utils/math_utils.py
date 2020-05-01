@@ -7,10 +7,6 @@ import math
 Num = Union[int, float]
 
 
-def geometric_mean(values: Collection[Num]) -> float:
-    return reduce(lambda x,y: x*y, values)**(1/(len(values)))
-
-
 def information_content(frequency: Num) -> float:
     if frequency == 0 or frequency == 1:
         ic = float(0)

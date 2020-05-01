@@ -1,5 +1,5 @@
 from typing import Union
-from ..utils.math_utils import geometric_mean
+from statistics import geometric_mean
 from ..utils.sim_utils import get_mica_ic
 from ..graph import Graph
 import math
