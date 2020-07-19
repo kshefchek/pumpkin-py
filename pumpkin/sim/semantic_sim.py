@@ -1,11 +1,12 @@
 from typing import Iterable, List, Union, Optional
 from enum import Enum
 import math
-from statistics import mean, geometric_mean
+import numpy as np
 from pyroaring import BitMap
 from . import metric, matrix
 from ..utils import sim_utils
 from ..graph.Graph import Graph
+from ..utils.math_utils import geometric_mean
 
 
 # Union types
@@ -13,15 +14,15 @@ Num = Union[int, float]
 
 
 class PairwiseSim(Enum):
-    GEOMETRIC = 'geometric'
-    IC        = 'ic'
-    JACCARD   = 'jaccard'
+    GEOMETRIC = 1
+    IC        = 2
+    JACCARD   = 3
 
 
 class MatrixMetric(Enum):
-    MAX = 'max'  # Max
-    AVG = 'avg'  # Average
-    BMA = 'bma'  # Best Match Average
+    MAX = 1  # Max
+    AVG = 2  # Average
+    BMA = 3  # Best Match Average
 
 
 class SemanticSim:
@@ -48,8 +49,8 @@ class SemanticSim:
         information content
         """
         # Filter out negative phenotypes
-        profile_a = {pheno for pheno in profile_a if not pheno.startswith("-")}
-        profile_b = {pheno for pheno in profile_b if not pheno.startswith("-")}
+        profile_a = {pheno for pheno in profile_a if not pheno[0] == "-"}
+        profile_b = {pheno for pheno in profile_b if not pheno[0] == "-"}
 
         a_closure = sim_utils.get_profile_closure(
             profile_a, self.graph)
@@ -95,11 +96,11 @@ class SemanticSim:
                 attribute = 1
             return attribute
 
-        positive_a_profile = {item for item in profile_a if not item.startswith('-')}
-        negative_a_profile = {item[1:] for item in profile_a if item.startswith('-')}
+        positive_a_profile = {item for item in profile_a if not item[0] == '-'}
+        negative_a_profile = {item[1:] for item in profile_a if item[0] == '-'}
 
-        positive_b_profile = {item for item in profile_b if not item.startswith('-')}
-        negative_b_profile = {item[1:] for item in profile_b if item.startswith('-')}
+        positive_b_profile = {item for item in profile_b if not item[0] == '-'}
+        negative_b_profile = {item[1:] for item in profile_b if item[0] == '-'}
 
         pos_a_closure = sim_utils.get_profile_closure(
             positive_a_profile, self.graph)
@@ -166,8 +167,8 @@ class SemanticSim:
         Negative phenotypes must be prefixed with a '-'
         """
         # Filter out negative phenotypes
-        profile_a = {pheno for pheno in profile_a if not pheno.startswith("-")}
-        profile_b = {pheno for pheno in profile_b if not pheno.startswith("-")}
+        profile_a = {pheno for pheno in profile_a if not pheno[0] == "-"}
+        profile_b = {pheno for pheno in profile_b if not pheno[0] == "-"}
 
         pheno_a_set = sim_utils.get_profile_closure(
             profile_a, self.graph)
@@ -201,8 +202,8 @@ class SemanticSim:
                  if normalized a float between 0-1
         """
         # Filter out negative phenotypes
-        profile_a = {pheno for pheno in profile_a if not pheno.startswith("-")}
-        profile_b = {pheno for pheno in profile_b if not pheno.startswith("-")}
+        profile_a = {pheno for pheno in profile_a if not pheno[0] == "-"}
+        profile_b = {pheno for pheno in profile_b if not pheno[0] == "-"}
 
         sim_measure = PairwiseSim.IC
 
@@ -220,11 +221,13 @@ class SemanticSim:
             b2a_matrix = matrix.flip_matrix(query_matrix)
             optimal_b_matrix = self._get_optimal_matrix(
                 profile_b, sim_measure=sim_measure)
-            resnik_score = mean(
+            resnik_score = np.mean(
                 [self._compute_resnik_score(
                     query_matrix, optimal_matrix, matrix_metric),
                  self._compute_resnik_score(
-                     b2a_matrix, optimal_b_matrix, matrix_metric)])
+                     b2a_matrix, optimal_b_matrix, matrix_metric)],
+                dtype=np.float64
+            )
         else:
             resnik_score = self._compute_resnik_score(
                 query_matrix, optimal_matrix, matrix_metric)
@@ -270,7 +273,7 @@ class SemanticSim:
             is_symmetric: Optional[bool]=False,
             is_same_species: Optional[bool]=True,
             sim_measure: Optional[PairwiseSim]= PairwiseSim.GEOMETRIC
-    ) -> float:
+    ) -> Union[float, np.ndarray]:
         """
         Phenodigm algorithm:
         https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3649640/pdf/bat025.pdf
@@ -283,8 +286,8 @@ class SemanticSim:
         is used in the owltools OWLTools-Sim package
         """
         # Filter out negative phenotypes
-        profile_a = {pheno for pheno in profile_a if not pheno.startswith("-")}
-        profile_b = {pheno for pheno in profile_b if not pheno.startswith("-")}
+        profile_a = {pheno for pheno in profile_a if not pheno[0] == "-"}
+        profile_b = {pheno for pheno in profile_b if not pheno[0] == "-"}
 
         query_matrix = self._get_score_matrix(profile_a, profile_b, sim_measure)
         if is_same_species:
@@ -297,9 +300,11 @@ class SemanticSim:
             b2a_matrix = matrix.flip_matrix(query_matrix)
             optimal_b_matrix = self._get_optimal_matrix(
                 profile_b, is_same_species, sim_measure)
-            score = mean(
+            score = np.mean(
                 [self.compute_phenodigm_score(query_matrix, optimal_matrix),
-                 self.compute_phenodigm_score(b2a_matrix, optimal_b_matrix)])
+                 self.compute_phenodigm_score(b2a_matrix, optimal_b_matrix)],
+                dtype=np.float64
+            )
         else:
             score = self.compute_phenodigm_score(query_matrix, optimal_matrix)
 
@@ -308,10 +313,12 @@ class SemanticSim:
     @staticmethod
     def compute_phenodigm_score(
             query_matrix: List[List[float]],
-            optimal_matrix: List[List[float]]) -> float:
-        return 100 * mean(
+            optimal_matrix: List[List[float]]) -> np.ndarray:
+        return 100 * np.mean(
             [matrix.max_percentage_score(query_matrix, optimal_matrix),
-             matrix.sym_bma_percentage_score(query_matrix, optimal_matrix)])
+             matrix.sym_bma_percentage_score(query_matrix, optimal_matrix)],
+            dtype=np.float64
+        )
 
     def _make_row(
             self,

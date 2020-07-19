@@ -1,5 +1,5 @@
 from typing import Optional, Iterable
-from pyroaring import BitMap
+from pyroaring import BitMap, FrozenBitMap
 from ..graph import Graph
 
 
@@ -8,14 +8,23 @@ def get_mica_ic(
         pheno_b: str,
         graph: Graph
 ) -> float:
-    p1_closure = graph.get_closure(pheno_a)
-    p2_closure = graph.get_closure(pheno_b)
-    intersect = p1_closure.intersection(p2_closure)
     if graph.is_ordered:
-        mica = graph.ic_map[intersect.max()] if intersect else 0
+        try:
+            p1_closure = graph.ancestors[pheno_a]
+            p2_closure = graph.ancestors[pheno_b]
+            mica = graph.ic_map[p1_closure.intersection(p2_closure).max()]
+        except KeyError:
+            mica = 0
+        except ValueError:
+            mica = 0
+
     else:
         mica = max(
-            [graph.ic_map[parent] for parent in p1_closure.intersection(p2_closure)],
+            [graph.ic_map[parent]
+             for parent in graph
+                 .get_ancestors(pheno_a)
+                 .intersection(graph.get_ancestors(pheno_b))
+             ],
             default=0
         )
 
@@ -31,8 +40,8 @@ def get_mica_id(
     Return ID of most informative common anscestor of two phenotypes
     Currently does not handle ambiguity (>1 equal MICAs)
     """
-    p1_closure = graph.get_closure(pheno_a)
-    p2_closure = graph.get_closure(pheno_b)
+    p1_closure = graph.get_ancestors(pheno_a)
+    p2_closure = graph.get_ancestors(pheno_b)
     overlap = p1_closure.intersection(p2_closure)
     max_ic = max([graph.ic_map[parent] for parent in overlap])
     mica = ''

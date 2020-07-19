@@ -1,6 +1,6 @@
 from typing import Union
-from statistics import geometric_mean
 from ..utils.sim_utils import get_mica_ic
+from ..utils.math_utils import geometric_mean
 from ..graph import Graph
 import math
 from pyroaring import BitMap

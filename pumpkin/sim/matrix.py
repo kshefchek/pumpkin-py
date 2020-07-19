@@ -1,59 +1,59 @@
-from typing import Union, Sequence, List
-from statistics import mean
+from typing import Union, Sequence, List, Tuple
 from itertools import chain
+import numpy as np
 
 
 # Union types
 Num = Union[int, float]
 
 
-def flip_matrix(matrix: Sequence[Sequence]) -> List[List]:
+def flip_matrix(matrix: Sequence[Sequence]) -> List[Tuple]:
     """
-    swap rows and columns in a list of lists
+    swap rows and columns in a list of lists, ie transpose
+    zip is faster than np.transpose or for loops
     """
-    column_len = len(matrix)
-    row_len = len(matrix[0])  # assumes all rows same length
-    flipped_matrix = [[0 for x in range(column_len)] for y in range(row_len)]
-    for row_index, row in enumerate(matrix):
-        for col_index, cell in enumerate(row):
-            flipped_matrix[col_index][row_index] = cell
-    return flipped_matrix
+    return zip(*matrix)
 
 
 def max_score(matrix: Sequence[Sequence[Num]]) -> float:
     return max(list(chain.from_iterable(matrix)))
 
 
-def sym_bma_score(matrix: Sequence[Sequence[Num]]) -> float:
+def sym_bma_score(matrix: Sequence[Sequence[Num]]) -> np.ndarray:
     """
     symmetric best max average score
     """
     forwards = [max(row) for row in matrix]
     flipped = flip_matrix(matrix)
     backwards = [max(row) for row in flipped]
-    combined_maxes = forwards + backwards
-    return mean(combined_maxes)
+    return np.mean([*forwards, *backwards], dtype=np.float64)
 
 
-def bma_score(matrix: Sequence[Sequence[Num]]) -> float:
+def bma_score(matrix: Sequence[Sequence[Num]]) -> np.ndarray:
     """
     best max average score
     """
-    return mean([max(row) for row in matrix])
+    return np.mean([max(row) for row in matrix], dtype=np.float64)
 
 
-def best_min_avg(matrix: Sequence[Sequence[Num]]) -> float:
+def best_min_avg(matrix: Sequence[Sequence[Num]]) -> np.ndarray:
     """
     best min average score
     """
-    return mean([min(row) for row in matrix])
+    return np.mean(
+        [min(row) for row in matrix],
+        dtype=np.float64
+    )
 
 
-def avg_score(matrix: Sequence[Sequence[Num]]) -> float:
+def avg_score(matrix: Sequence[Sequence[Num]]) -> np.ndarray:
     """
     average of every value in the matrix
     """
-    return mean(list(chain.from_iterable(matrix)))
+    return np.mean(
+        list(chain.from_iterable(matrix)),
+        dtype=np.float64
+    )
 
 
 def max_percentage_score(

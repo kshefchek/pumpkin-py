@@ -18,12 +18,17 @@ ANNOTATION_FILES = \
 	annotations/Caenorhabditis_elegans/Ce_gene_labels.txt \
 	annotations/Caenorhabditis_elegans/Ce_gene_phenotype.txt
 
+CURIFY = sed 's@<http://purl.obolibrary.org/obo/\([A-Za-z]*\)_\([A-Za-z0-9]*\)>@\1:\2@g'
+
 all: $(ANNOTATION_FILES) bin/robot.jar closures/hp-closures.tsv \
      closures/hp-labels.tsv closures/metazoa-slim.owl \
      closures/upheno-closures.tsv closures/upheno-labels.tsv \
      annotations/all-annotations.tsv
 
 bin/:
+	mkdir --parents $@
+
+tmp/:
 	mkdir --parents $@
 
 bin/robot.jar: | bin/
@@ -40,7 +45,7 @@ $(ANNOTATION_FILES): | annotations/
 closures/:
 	mkdir --parents $@
 
-closures/hp-closures.tsv: | closures/
+tmp/hp-closures.tsv: | tmp/
 	$(ROBOT) \
 	  merge \
 	    --input-iri http://purl.obolibrary.org/obo/hp.owl \
@@ -52,9 +57,9 @@ closures/hp-closures.tsv: | closures/
 	    --select anonymous \
 	  query \
 	    --query sparql/hp-closures.rq \
-		closures/hp-closures.tsv
+		$@
 
-closures/hp-labels.tsv: | closures/
+tmp/hp-labels.tsv: | tmp/
 	$(ROBOT) \
 	  merge \
 	    --input-iri http://purl.obolibrary.org/obo/hp.owl \
@@ -62,7 +67,7 @@ closures/hp-labels.tsv: | closures/
 	    --select anonymous \
 	  query \
 	    --query sparql/hp-labels.rq \
-		closures/hp-labels.tsv
+		$@
 
 closures/metazoa-slim.owl: | closures/
 	$(ROBOT) \
@@ -78,23 +83,21 @@ closures/metazoa-slim.owl: | closures/
 	    --axiom-generators "SubClass EquivalentClass" \
 	  remove \
 	    --select "anonymous individuals <http://purl.obolibrary.org/obo/IAO*> <http://www.geneontology.org/formats/oboInOwl*>" \
-	    --output metazoa-slim.owl
+	    --output $@
 
-closures/upheno-closures.tsv: closures/metazoa-slim.owl
+tmp/upheno-closures.tsv: closures/metazoa-slim.owl tmp/
 	$(ROBOT) \
-	  merge \
-	    --input closures/metazoa-slim.owl \
 	  query \
+	    --input closures/metazoa-slim.owl \
 	    --query sparql/upheno-closures.rq \
-		closures/upheno-closures.tsv
+		$@
 
-closures/upheno-labels.tsv: closures/metazoa-slim.owl
+tmp/upheno-labels.tsv: closures/metazoa-slim.owl tmp/
 	$(ROBOT) \
-	  merge \
-	    --input closures/metazoa-slim.owl \
 	  query \
+	    --input closures/metazoa-slim.owl \
 	    --query sparql/upheno-labels.rq \
-		closures/upheno-labels.tsv
+		$@
 
 annotations/all-annotations.tsv: $(ANNOTATION_FILES)
 	cat annotations/Homo_sapiens/Hs_disease_phenotype.txt \
@@ -103,4 +106,16 @@ annotations/all-annotations.tsv: $(ANNOTATION_FILES)
 	    annotations/Drosophila_melanogaster/Dm_gene_phenotype.txt \
 	    annotations/Cases/UDP_case_phenotype.txt \
 	    annotations/Caenorhabditis_elegans/Ce_gene_phenotype.txt \
-	    > annotations//all-annotations.tsv
+	    > $@
+
+closures/upheno-labels.tsv: tmp/upheno-labels.tsv
+	$(CURIFY) $< | sed 's/^?/#/' > $@
+
+closures/hp-labels.tsv: tmp/hp-labels.tsv
+	$(CURIFY) $< | sed 's/^?/#/' > $@
+
+closures/upheno-closures.tsv: tmp/upheno-closures.tsv
+	$(CURIFY) $< | sed 's/^?/#/' > $@
+
+closures/hp-closures.tsv: tmp/hp-closures.tsv
+	$(CURIFY) $< | sed 's/^?/#/' > $@

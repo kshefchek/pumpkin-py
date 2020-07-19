@@ -2,13 +2,11 @@ PumpkinPy (likely to be renamed) - Semantic similarity implemented in python
 
 ##### Getting Started
 
-Requires python 3.8, which includes a fast geometric mean function
-in the standard statistics package
-
  ```
-python3.8 -m venv venv
+python3.7 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+export PYTHONPATH=.:$PYTHONPATH
 ```
 
 ###### Fetching annotations and closures

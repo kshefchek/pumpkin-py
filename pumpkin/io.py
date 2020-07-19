@@ -44,12 +44,8 @@ def flat_to_graph(
     id_map = {}
     reader = csv.reader(file, delimiter='\t', quotechar='\"')
     for row in reader:
-        if row[0].startswith('?'): continue
-        (iri_a, iri_b) = row[0:2]
-
-        # Fast lazy uri to curie
-        node_a = iri_a[1:-1].replace("http://purl.obolibrary.org/obo/", "").replace("_", ":")
-        node_b = iri_b[1:-1].replace("http://purl.obolibrary.org/obo/", "").replace("_", ":")
+        if row[0].startswith('#'): continue
+        (node_a, node_b) = row[0:2]
 
         try:
             descendants[node_b].add(node_a)

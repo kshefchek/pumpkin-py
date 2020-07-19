@@ -2,9 +2,9 @@ from enum import Enum
 
 
 class Datasets(Enum):
-    DISEASES    = 'diseases'
-    MOUSE_GENES = 'mouse_genes'
-    ZFISH_GENES = 'zfish_genes'
-    FLY_GENES   = 'fly_genes'
-    WORM_GENES  = 'worm_genes'
-    CASES       = 'cases'
+    DISEASES    = 1
+    MOUSE_GENES = 2
+    ZFISH_GENES = 3
+    FLY_GENES   = 4
+    WORM_GENES  = 5
+    CASES       = 6

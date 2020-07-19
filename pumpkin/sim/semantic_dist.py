@@ -2,7 +2,6 @@ from typing import Iterable, Dict, List, Union, Optional
 from enum import Enum
 from ..graph.Graph import Graph
 from . import metric, matrix
-from statistics import mean
 from ..utils import sim_utils
 import numpy as np
 
@@ -61,7 +60,7 @@ class SemanticDist():
             profile_a: Iterable[str],
             profile_b: Iterable[str],
             distance_measure: Union[PairwiseDist, str, None] = PairwiseDist.EUCLIDEAN
-    ) -> float:
+    ) -> np.ndarray:
         """
         Matrix wise euclidean distance
 
@@ -74,8 +73,9 @@ class SemanticDist():
         """
         ab_matrix = self._get_score_matrix(profile_a, profile_b, distance_measure)
         ba_matrix = self._get_score_matrix(profile_b, profile_a, distance_measure)
-        return mean(
-            [matrix.best_min_avg(ab_matrix), matrix.best_min_avg(ba_matrix)]
+        return np.mean(
+            [matrix.best_min_avg(ab_matrix), matrix.best_min_avg(ba_matrix)],
+            dtype=np.float64
         )
 
     def _get_score_matrix(
