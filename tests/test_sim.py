@@ -1,5 +1,4 @@
 from pumpkin.graph.RDFGraph import RDFGraph
-from pumpkin.graph.CacheGraph import CacheGraph
 from pumpkin.io import flat_to_annotations, flat_to_graph
 from pumpkin.sim.semantic_dist import SemanticDist
 from pumpkin.sim.semantic_sim import SemanticSim
@@ -45,9 +44,7 @@ class TestSemanticWithCacheGraph():
         root = "HP:0000118"
 
         with open(closures, 'r') as closure_file:
-            id_map, ancestors, descendants = flat_to_graph(closure_file, root)
-
-        self.graph = CacheGraph(root, id_map, ancestors, descendants)
+            self.graph = flat_to_graph(closure_file, root)
 
         with open(annotations, 'r') as annot_file:
             self.annot_map = flat_to_annotations(annot_file)
