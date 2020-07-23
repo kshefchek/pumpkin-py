@@ -1,7 +1,8 @@
 from abc import ABCMeta, abstractmethod
 from typing import Optional, Set, Dict
-from pyroaring import BitMap
+from pyroaring import FrozenBitMap
 from ..utils.math_utils import information_content
+from ..models.Namespace import Namespace
 
 
 class Graph(metaclass=ABCMeta):
@@ -13,17 +14,18 @@ class Graph(metaclass=ABCMeta):
     root: str
     ic_map: Dict[int, float]
     id_map: Dict[str, int]
+    namespace_map: Dict[Namespace, FrozenBitMap]
     is_ordered: bool
 
     @abstractmethod
-    def get_descendants(self, node: str) -> BitMap:
+    def get_descendants(self, node: str) -> FrozenBitMap:
         pass
 
     @abstractmethod
-    def get_ancestors(self,  node: str) -> BitMap:
+    def get_ancestors(self,  node: str) -> FrozenBitMap:
         pass
 
-    def get_closure(self, node: str, negative: Optional[bool] = False) -> BitMap:
+    def get_closure(self, node: str, negative: Optional[bool] = False) -> FrozenBitMap:
         if negative:
             nodes = self.get_descendants(node)
         else:

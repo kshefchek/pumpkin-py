@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class Datasets(Enum):
+class Dataset(Enum):
     DISEASES    = 1
     MOUSE_GENES = 2
     ZFISH_GENES = 3

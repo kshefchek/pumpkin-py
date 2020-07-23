@@ -1,7 +1,6 @@
 from pathlib import Path
 import timeit
 import gzip
-from pumpkin.graph.CacheGraph import CacheGraph
 from pumpkin.io import flat_to_annotations, flat_to_graph
 from pumpkin.sim.semantic_sim import SemanticSim, PairwiseSim
 
@@ -18,9 +17,7 @@ with gzip.open(annotations, 'rt') as annot_file:
     annot_map = flat_to_annotations(annot_file)
 
 with gzip.open(closures, 'rt') as closure_file:
-    id_map, ancestors, descendants = flat_to_graph(closure_file, root, annot_map)
-
-graph = CacheGraph(root, id_map, ancestors, descendants, True)
+    graph = flat_to_graph(closure_file, root, annot_map)
 
 with gzip.open(g2p, 'rt') as annot_file:
     mouse_genes = flat_to_annotations(annot_file)

@@ -1,8 +1,8 @@
 from typing import Dict, Set, Tuple, TextIO, Optional
-from collections import OrderedDict
 from pyroaring import FrozenBitMap
 import csv
-from pumpkin.graph.CacheGraph import CacheGraph
+from .graph.CacheGraph import CacheGraph
+from .models.Namespace import namespace
 
 
 def flat_to_annotations(file: TextIO) -> Dict[str, Set[str]]:
@@ -28,7 +28,7 @@ def flat_to_graph(
         file: TextIO,
         root: str,
         annotations: Optional[Dict[str, Set[str]]] = None
-) -> Tuple[Dict[str, int], Dict[str, FrozenBitMap], Dict[str, FrozenBitMap]]:
+) -> CacheGraph:
     """
     Convert a two column file to map of ancestors and desecendants
     :param file: text I/O stream such as returned by open()
@@ -42,6 +42,7 @@ def flat_to_graph(
     ancestors = {}
     descendants = {}
     id_map = {}
+    namespace_map = {}
     reader = csv.reader(file, delimiter='\t', quotechar='\"')
     for row in reader:
         if row[0].startswith('#'): continue
@@ -61,28 +62,31 @@ def flat_to_graph(
     for node in ancestors.keys():
         ancestors[node] = descendants[root] & ancestors[node]
 
-    # If annotations were passed sort the bitmap by IC
+    # If annotations were passed sort the bitmap by IC in ascending order
     if annotations:
         graph = CacheGraph(root, id_map, ancestors, descendants)
         graph.load_ic_map(annotations)
 
-        # Sort ascending by IC for int encoding
-        sorted_ic_map = OrderedDict(
-            sorted(
-                [(cls, ic) for cls, ic in graph.ic_map.items()],
-                key=lambda x: x[1]
-            )
-        )
+        sorted_ic_map = zip(*sorted(
+            [(cls, ic) for cls, ic in graph.ic_map.items()],
+            key=lambda x: x[1]
+        ))
         id = 1
-        for node in sorted_ic_map.keys():
+        for node in next(sorted_ic_map):
             id_map[node] = id
             id += 1
     else:
-        # Int encode
+        # Int encode non ordered
         id = 1
         for node in descendants[root]:
             id_map[node] = id
             id += 1
+
+    for ns in namespace.keys():
+        namespace_map[ns] = FrozenBitMap(
+            [id_map[node] for node in id_map.keys()
+             if node.startswith(namespace[ns] + ':')]
+        )
 
     for node in ancestors.keys():
         ancestors[node] = FrozenBitMap([id_map[node] for node in ancestors[node]])
@@ -90,4 +94,9 @@ def flat_to_graph(
     for node in descendants.keys():
         descendants[node] = FrozenBitMap([id_map[node] for node in descendants[node]])
 
-    return id_map, ancestors, descendants
+    if annotations:
+        graph = CacheGraph(root, id_map, ancestors, descendants, namespace_map, is_ordered=True)
+    else:
+        graph = CacheGraph(root, id_map, ancestors, descendants, namespace_map, is_ordered=False)
+
+    return graph

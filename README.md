@@ -2,6 +2,8 @@ PumpkinPy (likely to be renamed) - Semantic similarity implemented in python
 
 ##### Getting Started
 
+Requires python3-dev to install pyroaring
+
  ```
 python3.7 -m venv venv
 source venv/bin/activate
