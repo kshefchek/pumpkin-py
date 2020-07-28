@@ -2,11 +2,11 @@ from enum import Enum
 
 
 class Namespace(Enum):
-    UPHENO = 1
-    HP = 2
-    MP = 3
-    ZP = 4
-    FBcv = 5
+    UPHENO      = 1
+    HP          = 2
+    MP          = 3
+    ZP          = 4
+    FBcv        = 5
     WBPhenotype = 6
 
 

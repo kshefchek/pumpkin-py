@@ -430,8 +430,8 @@ class SemanticSim:
     def _get_optimal_matrix(
             self,
             profile: Iterable[str],
-            is_same_species: Optional[bool]=True,
-            sim_measure: Union[PairwiseSim, None]= PairwiseSim.IC
+            is_same_species: Optional[bool] = True,
+            sim_measure: Union[PairwiseSim, None] = PairwiseSim.IC
     ) -> List[List[float]]:
         """
         Only implemented for same species comparisons

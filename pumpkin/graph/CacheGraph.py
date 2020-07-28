@@ -1,5 +1,6 @@
 from typing import Dict
 from pyroaring import FrozenBitMap
+from bidict import bidict
 from .Graph import Graph
 from ..models.Namespace import Namespace
 
@@ -14,7 +15,7 @@ class CacheGraph(Graph):
     def __init__(
             self,
             root: str,
-            id_map: Dict[str, int],
+            id_map: bidict,  # Dict[str, int]
             ancestors: Dict[str, FrozenBitMap],
             descendants: Dict[str, FrozenBitMap],
             namespace_map: Dict[Namespace, FrozenBitMap] = None,
@@ -34,14 +35,14 @@ class CacheGraph(Graph):
                            created from an array of integers of all ids in
                            the namespace
         :param is_ordered: {default=False} True if integers are sorted in ascending
-                           order
+                           order by information content
         """
         self.root = root
         self.id_map = id_map
         self.ancestors = ancestors
         self.descendants = descendants
         self.is_ordered = is_ordered
-        self.ic_map = {}
+        self.namespace_map = namespace_map
 
     def get_ancestors(self, node: str) -> FrozenBitMap:
         try:

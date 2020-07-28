@@ -1,8 +1,9 @@
 from pathlib import Path
 import timeit
 import gzip
-from pumpkin.io import flat_to_annotations, flat_to_graph
-from pumpkin.sim.semantic_sim import SemanticSim, PairwiseSim
+from pumpkin.sim.semantic_sim import SemanticSim
+from pumpkin.utils.sim_utils import load_ic_store
+from pumpkin.store.ICStore import ICStore
 
 
 closures = Path(__file__).parent / 'resources' / 'upheno-closures.tsv.gz'
@@ -24,6 +25,11 @@ with gzip.open(g2p, 'rt') as annot_file:
 
 print("Calculating information content")
 graph.load_ic_map(annot_map)
+
+#outfile_path = g2p = Path(__file__).parent / 'resources' / 'ic_store.npy'
+#with open(outfile_path, 'wb') as outfile:
+#    ic_store = ICStore(store=load_ic_store(graph, outfile))
+
 
 semantic_sim = SemanticSim(graph)
 

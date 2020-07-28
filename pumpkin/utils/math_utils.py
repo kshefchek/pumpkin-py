@@ -15,7 +15,7 @@ def information_content(frequency: Num) -> float:
     return ic
 
 
-def binomial_coeff(num):
+def binomial_coeff(num) -> float:
     return (num * (num + 1)) / 2
 
 

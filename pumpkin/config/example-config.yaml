@@ -1,0 +1,46 @@
+---
+# Configuration for configuring closure, annotations, and saved cache files
+# TODO turn this into a schema
+closures: "./resources/upheno-closures.tsv.gz"
+ic_store:
+id_map:
+annotations:
+  disease:
+    path: "/foo/bar"
+    use_for_ic: True
+
+  mouse_gene:
+    path: "/foo/bar"
+    use_for_ic: False
+
+  zfish_gene:
+    path: "/foo/bar"
+    use_for_ic: False
+
+  fly_gene:
+    path: "/foo/bar"
+    use_for_ic: False
+
+  worm_gene:
+    path: "/foo/bar"
+    use_for_ic: False
+
+  case:
+    path: "/foo/bar"
+    use_for_ic: True
+
+  mouse_genotype:
+    path: "/foo/bar"
+    use_for_ic: True
+
+  zfish_genotype:
+    path: "/foo/bar"
+    use_for_ic: True
+
+  fly_allele:
+    path: "/foo/bar"
+    use_for_ic: True
+
+  all:
+    path: "/foo/bar"
+    use_for_ic: False

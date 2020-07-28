@@ -80,7 +80,6 @@ def rerank_ties(
                 else:
                     new_ranks.append(last_new_rank)
             else:
-                adj_ranks = []
                 new_rank = None
                 if method == RankMethod.AVG:
                     new_rank = average_ties(last_new_rank, tie_count)
@@ -100,7 +99,6 @@ def rerank_ties(
         last_rank = rank
 
     if tie_count > 0:
-        adj_ranks = []
         new_rank = None
         if method == RankMethod.AVG:
             new_rank = average_ties(last_new_rank, tie_count)

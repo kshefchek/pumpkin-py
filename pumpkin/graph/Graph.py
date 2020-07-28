@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import Optional, Set, Dict
 from pyroaring import FrozenBitMap
-from ..utils.math_utils import information_content
+from bidict import bidict
 from ..models.Namespace import Namespace
 
 
@@ -12,8 +12,7 @@ class Graph(metaclass=ABCMeta):
     information content about classes
     """
     root: str
-    ic_map: Dict[int, float]
-    id_map: Dict[str, int]
+    id_map: bidict  # Dict[str, int]
     namespace_map: Dict[Namespace, FrozenBitMap]
     is_ordered: bool
 
@@ -31,34 +30,3 @@ class Graph(metaclass=ABCMeta):
         else:
             nodes = self.get_ancestors(node)
         return nodes
-
-    def load_ic_map(self, annotations: Dict[str, Set[str]]):
-        """
-        Initializes ic_map
-        """
-        explicit_annotations = 0
-        node_annotations = {
-            node: 0
-            for node in self.get_descendants(self.root)
-        }
-        for profile in annotations.values():
-            for node in profile:
-                has_ancestors = False
-                for cls in self.get_ancestors(node):
-                    node_annotations[cls] += 1
-                    has_ancestors = True
-                if has_ancestors:
-                    explicit_annotations += 1
-
-        # laplacian smoothing
-        for node, annot_count in node_annotations.items():
-            if annot_count == 0:
-                explicit_annotations += 1
-                for ancestor in self.get_ancestors(node):
-                    node_annotations[ancestor] += 1
-
-        for node, annot_count in node_annotations.items():
-            self.ic_map[node] = information_content(annot_count / explicit_annotations)
-
-    def get_ic(self, node: str) -> float:
-        return self.ic_map[self.id_map[node]]
