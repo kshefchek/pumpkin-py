@@ -3,7 +3,7 @@ from rdflib import Graph as RDFLibGraph
 from typing import Optional, Set
 from pyroaring import FrozenBitMap
 from bidict import bidict
-from .Graph import Graph
+from .graph import Graph
 
 
 class RDFGraph(Graph):
@@ -19,18 +19,20 @@ class RDFGraph(Graph):
             self,
             root: str,
             iri: str,
-            edge: Optional[URIRef]=RDFS['subClassOf']
+            id_map: bidict,  # Dict[str, int]
+            edge: Optional[URIRef] = RDFS['subClassOf']
     ):
         self.graph = RDFLibGraph()
         self.root = root
         self.edge = edge
         self.graph.load(iri, format=util.guess_format(iri))
-        self.is_ordered = False
-        self.id_map = bidict()
-        id = 1
-        for node in self._get_descendants(root):
-            self.id_map[node] = id
-            id += 1
+        if id_map is None:
+            id = 1
+            for node in self._get_descendants(root):
+                self.id_map[node] = id
+                id += 1
+        else:
+            self.id_map = id_map
 
     def get_ancestors(self, node: str) -> FrozenBitMap:
         return FrozenBitMap([self.id_map[node] for node in self._get_ancestors(node)])

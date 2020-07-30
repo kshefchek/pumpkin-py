@@ -1,8 +1,8 @@
 from abc import ABCMeta, abstractmethod
-from typing import Optional, Set, Dict
-from pyroaring import FrozenBitMap
+from typing import Optional, Iterable, Dict
+from pyroaring import FrozenBitMap, BitMap
 from bidict import bidict
-from ..models.Namespace import Namespace
+from ..models.namespace import Namespace
 
 
 class Graph(metaclass=ABCMeta):
@@ -14,7 +14,6 @@ class Graph(metaclass=ABCMeta):
     root: str
     id_map: bidict  # Dict[str, int]
     namespace_map: Dict[Namespace, FrozenBitMap]
-    is_ordered: bool
 
     @abstractmethod
     def get_descendants(self, node: str) -> FrozenBitMap:
@@ -30,3 +29,20 @@ class Graph(metaclass=ABCMeta):
         else:
             nodes = self.get_ancestors(node)
         return nodes
+
+    def get_profile_closure(
+            self,
+            profile: Iterable[str],
+            negative: Optional[bool] = False
+    ) -> BitMap:
+        """
+        Given a list of phenotypes, get the reflexive closure for each phenotype
+        stored in a single set.  This can be used for jaccard similarity or
+        simGIC
+
+        This should probably be moved elsewhere as the loan fx here
+        """
+        return BitMap.union(
+            *[self.get_closure(node, negative=negative)
+              for node in profile]
+        )

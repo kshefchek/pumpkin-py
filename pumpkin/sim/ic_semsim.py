@@ -1,11 +1,10 @@
 from typing import Iterable, List, Union, Optional
 from enum import Enum
-import math
 import numpy as np
 from pyroaring import BitMap
 from . import metric, matrix
-from ..utils import sim_utils
-from ..graph.Graph import Graph
+from .graph_semsim import GraphSemSim
+from ..graph.ic_graph import ICGraph
 from ..utils.math_utils import geometric_mean
 
 
@@ -25,12 +24,23 @@ class MatrixMetric(Enum):
     BMA = 3  # Best Match Average
 
 
-class SemanticSim:
+class ICSemSim:
+    """
+    Information content based semantic similarity: similarity based on
+    the most informative common term between two terms, where information
+    content is the -log(term annotation frequency)
 
-    def __init__(
-            self,
-            graph: Graph,
-    ):
+    See Resnik's first manuscript on IC based similarity as a background:
+    https://arxiv.org/pdf/cmp-lg/9511007.pdf
+
+    Implemented methods:
+     1. Resnik
+     2. PhenoDigm
+     3. simGIC
+     3. IC weighted cosine sim
+    """
+
+    def __init__(self, graph: ICGraph):
         self.graph = graph
 
     def sim_gic(
@@ -39,7 +49,7 @@ class SemanticSim:
             profile_b: Iterable[str]
     ) -> float:
         """
-        Groupwise resnik similarity:
+        Summed resnik similarity:
         Summed information content of common ancestors divided by summed
         information content of all ancestors in profile a and profile b
         https://bmcbioinformatics.biomedcentral.com/track/
@@ -52,138 +62,25 @@ class SemanticSim:
         profile_a = {pheno for pheno in profile_a if not pheno[0] == "-"}
         profile_b = {pheno for pheno in profile_b if not pheno[0] == "-"}
 
-        a_closure = sim_utils.get_profile_closure(
-            profile_a, self.graph)
-        b_closure = sim_utils.get_profile_closure(
-            profile_b, self.graph)
+        a_closure = self.graph.get_profile_closure(profile_a)
+        b_closure = self.graph.get_profile_closure(profile_b)
 
         numerator = sum(
-            [self.graph.ic_map[pheno] for pheno in a_closure.intersection(b_closure)]
+            [self.graph.ic_store.ic_map[pheno] for pheno in a_closure.intersection(b_closure)]
         )
         denominator = sum(
-            [self.graph.ic_map[pheno] for pheno in a_closure.union(b_closure)]
+            [self.graph.ic_store.ic_map[pheno] for pheno in a_closure.union(b_closure)]
         )
 
         return numerator/denominator
-
-
-    def cosine_sim(
-            self,
-            profile_a: Iterable[str],
-            profile_b: Iterable[str],
-            ic_weighted: Optional[bool] = False,
-            negative_weight: Optional[Num] = .1,
-    ) -> float:
-        """
-        Cosine similarity
-        Profiles are treated as vectors of numbers between 0-1:
-        1: Phenotype present
-        0: Absent (no information)
-        1 * negative weight: Negated phenotypes
-
-        if ic_weighted is true the attributes become vectors
-        of information content scores
-
-        Inferred phenotypes are computed as parent classes for positive phenotypes
-        and child classes for negative phenotypes.  Typically we do not want to
-        weight negative phenotypes as high as positive phenotypes.  A weight between
-        .01-.1 may be desirable
-        """
-        def score(term):
-            if ic_weighted:
-                attribute = self.graph.ic_map[term]
-            else:
-                attribute = 1
-            return attribute
-
-        positive_a_profile = {item for item in profile_a if not item[0] == '-'}
-        negative_a_profile = {item[1:] for item in profile_a if item[0] == '-'}
-
-        positive_b_profile = {item for item in profile_b if not item[0] == '-'}
-        negative_b_profile = {item[1:] for item in profile_b if item[0] == '-'}
-
-        pos_a_closure = sim_utils.get_profile_closure(
-            positive_a_profile, self.graph)
-        pos_b_closure = sim_utils.get_profile_closure(
-            positive_b_profile, self.graph)
-
-        neg_a_closure = {"-{}".format(item)
-                         for item in sim_utils.get_profile_closure(
-            negative_a_profile, self.graph, negative=True)
-                         } if negative_a_profile else set()
-
-        neg_b_closure = {"-{}".format(item)
-                         for item in sim_utils.get_profile_closure(
-            negative_b_profile, self.graph, negative=True)
-                         } if negative_b_profile else set()
-
-        pos_intersect_dot_product = sum(
-            [math.pow(score(item), 2)
-             for item in pos_a_closure.intersection(pos_b_closure)]
-        )
-
-        neg_intersect_dot_product = sum(
-            [math.pow(score(item) * negative_weight, 2)
-             for item in neg_a_closure.intersection(neg_b_closure)]
-        )
-
-        a_square_dot_product = math.sqrt(
-            sum(
-                [math.pow(score(item), 2) for item in pos_a_closure],
-            ) +
-            sum(
-                [math.pow(score(item) * negative_weight, 2)
-                 for item in neg_a_closure]
-            )
-        )
-
-        b_square_dot_product = math.sqrt(
-            sum(
-                [math.pow(score(item), 2) for item in pos_b_closure]
-            ) +
-            sum(
-                [math.pow(score(item) * negative_weight, 2)
-                 for item in neg_b_closure]
-            )
-        )
-
-        numerator = pos_intersect_dot_product + neg_intersect_dot_product
-        denominator = a_square_dot_product * b_square_dot_product
-
-        try:
-            result = numerator / denominator
-        except ZeroDivisionError:
-            result = 0
-
-        return result
-
-    def jaccard_sim(
-            self,
-            profile_a: Iterable[str],
-            profile_b: Iterable[str]
-    ) -> float:
-        """
-        Groupwise jaccard similarty
-        Negative phenotypes must be prefixed with a '-'
-        """
-        # Filter out negative phenotypes
-        profile_a = {pheno for pheno in profile_a if not pheno[0] == "-"}
-        profile_b = {pheno for pheno in profile_b if not pheno[0] == "-"}
-
-        pheno_a_set = sim_utils.get_profile_closure(
-            profile_a, self.graph)
-        pheno_b_set = sim_utils.get_profile_closure(
-            profile_b, self.graph)
-
-        return metric.jaccard(pheno_a_set, pheno_b_set)
 
     def resnik_sim(
             self,
             profile_a: Iterable[str],
             profile_b: Iterable[str],
             matrix_metric: Union[MatrixMetric, str, None] = MatrixMetric.BMA,
-            is_symmetric: Optional[bool]=False,
-            is_normalized: Optional[bool]=False
+            is_symmetric: Optional[bool] = False,
+            is_normalized: Optional[bool] = False
     ) -> float:
         """
         Resnik similarity
@@ -270,9 +167,9 @@ class SemanticSim:
             self,
             profile_a: Iterable[str],
             profile_b: Iterable[str],
-            is_symmetric: Optional[bool]=False,
-            is_same_species: Optional[bool]=True,
-            sim_measure: Optional[PairwiseSim]= PairwiseSim.GEOMETRIC
+            is_symmetric: Optional[bool] = False,
+            is_same_species: Optional[bool] = True,
+            sim_measure: Optional[PairwiseSim] = PairwiseSim.GEOMETRIC
     ) -> Union[float, np.ndarray]:
         """
         Phenodigm algorithm:
@@ -328,13 +225,15 @@ class SemanticSim:
     )-> List[float]:
 
         if sim_measure == PairwiseSim.GEOMETRIC:
-            sim_fn = metric.jac_ic_geomean
+            #sim_fn = metric.jac_ic_geomean
+            row = [metric.jac_ic_geomean(pheno_a, pheno_b, self.graph) for pheno_b in profile_b]
         elif sim_measure == PairwiseSim.IC:
-            sim_fn = metric.get_mica_ic
+            #sim_fn = self.graph.get_mica_ic
+            row = [self.graph.get_mica_ic(pheno_a, pheno_b) for pheno_b in profile_b]
         else:
             raise NotImplementedError
 
-        return [sim_fn(pheno_a, pheno_b, self.graph) for pheno_b in profile_b]
+        return row
 
     def _get_score_matrix(
             self,
@@ -353,13 +252,28 @@ class SemanticSim:
     ) -> float:
         return self.resnik_sim(profile_a, profile_b, is_symmetric=True)
 
-    def cosine_ic(
+    def cosine_ic_sim(
             self,
             profile_a: Iterable[str],
             profile_b: Iterable[str],
             negative_weight: Optional[Num] = .1,
     ) -> float:
-        return self.cosine_sim(profile_a, profile_b, True, negative_weight)
+        """
+        IC weighted cosine similarity (instead of vectors of 0/1 absent/present
+        vectors are the information content values for each phenotype
+
+        :param profile_a: Iterable of curies
+        :param profile_b: Iterable of curies
+        :param negative_weight: Vector weight for negative phenotypes (weight * ic)
+        :return: cosine similarity score as a float between 0-1
+        """
+        graph_sim = GraphSemSim(self.graph)
+        return graph_sim.cosine_sim(
+            profile_a,
+            profile_b,
+            negative_weight,
+            lambda term: self.graph.ic_store.ic_map[term]
+        )
 
     def symmetric_phenodigm(
             self,
@@ -386,46 +300,20 @@ class SemanticSim:
         # Filter out negative phenotypes
 
         profile_union = BitMap.union(
-                *[sim_utils.get_profile_closure(
-                    profile, self.graph) for profile in profiles]
+                *[self.graph.get_profile_closure(profile) for profile in profiles]
         )
         profile_intersection = BitMap.intersection(
-            *[sim_utils.get_profile_closure(
-                profile, self.graph) for profile in profiles]
+            *[self.graph.get_profile_closure(profile) for profile in profiles]
         )
 
         numerator = sum(
-            [self.graph.ic_map[pheno] for pheno in profile_intersection]
+            [self.graph.ic_store.ic_map[pheno] for pheno in profile_intersection]
         )
         denominator = sum(
-            [self.graph.ic_map[pheno] for pheno in profile_union]
+            [self.graph.ic_store.ic_map[pheno] for pheno in profile_union]
         )
 
         return numerator/denominator
-
-    def groupwise_jaccard(
-            self,
-            profiles: Iterable[Iterable[str]]
-    ) -> float:
-        """
-        jaccard similarity applied to greater than 2 profiles,
-        ie groupwise similarity instead of pairwise
-
-        Useful for quantifying the strength of a cluster of
-        profiles (eg disease clustering)
-        """
-        # Filter out negative phenotypes
-
-        profile_union = BitMap.union(
-            *[sim_utils.get_profile_closure(
-                profile, self.graph) for profile in profiles]
-        )
-        profile_intersection = BitMap.intersection(
-            *[sim_utils.get_profile_closure(
-                profile, self.graph) for profile in profiles]
-        )
-
-        return len(profile_intersection)/len(profile_union)
 
     def _get_optimal_matrix(
             self,

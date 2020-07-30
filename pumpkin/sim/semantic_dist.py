@@ -1,6 +1,6 @@
 from typing import Iterable, Dict, List, Union, Optional
 from enum import Enum
-from ..graph.Graph import Graph
+from ..graph.graph import Graph
 from . import metric, matrix
 from ..utils import sim_utils
 import numpy as np

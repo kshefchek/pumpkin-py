@@ -1,7 +1,7 @@
 from typing import List, Optional
 from enum import Enum
 from ..utils.math_utils import binomial_coeff
-from ..models.Result import SearchResult
+from ..models.result import SearchResult
 
 
 class RankMethod(Enum):

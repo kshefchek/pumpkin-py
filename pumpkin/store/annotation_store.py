@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Dict, Set
-from ..models.Dataset import Dataset
+from ..models.dataset import Dataset
 
 
 @dataclass

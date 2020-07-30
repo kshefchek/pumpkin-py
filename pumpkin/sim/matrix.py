@@ -1,4 +1,4 @@
-from typing import Union, Sequence, List, Tuple
+from typing import Union, Sequence, Iterator, Tuple, Any
 from itertools import chain
 import numpy as np
 
@@ -7,7 +7,7 @@ import numpy as np
 Num = Union[int, float]
 
 
-def flip_matrix(matrix: Sequence[Sequence]) -> List[Tuple]:
+def flip_matrix(matrix: Sequence[Sequence]) -> Iterator[Tuple[Any]]:
     """
     swap rows and columns in a list of lists, ie transpose
     zip is faster than np.transpose or for loops

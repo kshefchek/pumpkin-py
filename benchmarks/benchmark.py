@@ -1,9 +1,10 @@
 from pathlib import Path
 import timeit
 import gzip
-from pumpkin.sim.semantic_sim import SemanticSim
-from pumpkin.utils.sim_utils import load_ic_store
-from pumpkin.store.ICStore import ICStore
+from pumpkin.sim.ic_semsim import ICSemSim, PairwiseSim
+from pumpkin.sim.graph_semsim import GraphSemSim
+from pumpkin.builder.annotation_builder import flat_to_annotations
+from pumpkin.builder.graph_builder import build_ic_graph
 
 
 closures = Path(__file__).parent / 'resources' / 'upheno-closures.tsv.gz'
@@ -18,20 +19,21 @@ with gzip.open(annotations, 'rt') as annot_file:
     annot_map = flat_to_annotations(annot_file)
 
 with gzip.open(closures, 'rt') as closure_file:
-    graph = flat_to_graph(closure_file, root, annot_map)
+    graph = build_ic_graph(closure_file, root, annot_map)
 
 with gzip.open(g2p, 'rt') as annot_file:
     mouse_genes = flat_to_annotations(annot_file)
 
-print("Calculating information content")
-graph.load_ic_map(annot_map)
+#print("Calculating information content")
+#graph.load_ic_map(annot_map)
 
 #outfile_path = g2p = Path(__file__).parent / 'resources' / 'ic_store.npy'
 #with open(outfile_path, 'wb') as outfile:
 #    ic_store = ICStore(store=load_ic_store(graph, outfile))
 
 
-semantic_sim = SemanticSim(graph)
+ic_sim = ICSemSim(graph)
+graph_sim = GraphSemSim(graph)
 
 profile_a = "HP:0000403,HP:0000518,HP:0000565,HP:0000767," \
             "HP:0000872,HP:0001257,HP:0001263,HP:0001290," \
@@ -45,7 +47,7 @@ print('Running comparisons')
 
 print('phenodigm: ',
       timeit.timeit(
-          stmt="for profile_b in mouse_genes.values(): semantic_sim.phenodigm_compare(profile_a, profile_b, sim_measure=PairwiseSim.IC)",
+          stmt="for profile_b in mouse_genes.values(): ic_sim.phenodigm_compare(profile_a, profile_b, sim_measure=PairwiseSim.IC)",
           globals=globals(),
           number=1
       )
@@ -53,7 +55,7 @@ print('phenodigm: ',
 
 print('resnik: ',
       timeit.timeit(
-          stmt="for profile_b in mouse_genes.values(): semantic_sim.resnik_sim(profile_a, profile_b)",
+          stmt="for profile_b in mouse_genes.values(): ic_sim.resnik_sim(profile_a, profile_b)",
           globals=globals(),
           number=1
       )
@@ -61,7 +63,7 @@ print('resnik: ',
 
 print('jaccard: ',
       timeit.timeit(
-          stmt="for profile_b in mouse_genes.values(): semantic_sim.jaccard_sim(profile_a, profile_b)",
+          stmt="for profile_b in mouse_genes.values(): graph_sim.jaccard_sim(profile_a, profile_b)",
           globals=globals(),
           number=1
       )
@@ -69,13 +71,13 @@ print('jaccard: ',
 
 print('cosine: ',
       timeit.timeit(
-          stmt="for profile_b in mouse_genes.values(): semantic_sim.cosine_sim(profile_a, profile_b)",
+          stmt="for profile_b in mouse_genes.values(): graph_sim.cosine_sim(profile_a, profile_b)",
           globals=globals(),
           number=1
       )
 )
 
-print(semantic_sim.phenodigm_compare(profile_a, profile_b))
-print(semantic_sim.resnik_sim(profile_a, profile_b))
-print(semantic_sim.jaccard_sim(profile_a, profile_b))
-print(semantic_sim.cosine_sim(profile_a, profile_b))
+print(ic_sim.phenodigm_compare(profile_a, profile_b))
+print(ic_sim.resnik_sim(profile_a, profile_b))
+print(graph_sim.jaccard_sim(profile_a, profile_b))
+print(graph_sim.cosine_sim(profile_a, profile_b))

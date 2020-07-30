@@ -3,7 +3,7 @@ import gzip
 import cProfile, pstats, io
 from pstats import SortKey
 
-from pumpkin.graph.CacheGraph import CacheGraph
+from pumpkin.graph.cache_graph import CacheGraph
 from pumpkin.io import flat_to_annotations, flat_to_graph
 from pumpkin.sim.semantic_sim import SemanticSim, PairwiseSim
 

@@ -1,7 +1,9 @@
-from pumpkin.graph.RDFGraph import RDFGraph
-from pumpkin.io import flat_to_annotations, flat_to_graph
+from pumpkin.graph.rdf_graph import RDFGraph
 from pumpkin.sim.semantic_dist import SemanticDist
-from pumpkin.sim.semantic_sim import SemanticSim
+from pumpkin.sim.ic_semsim import ICSemSim
+from pumpkin.sim.graph_semsim import GraphSemSim
+from pumpkin.builder.annotation_builder import flat_to_annotations
+
 from pathlib import Path
 
 
@@ -22,8 +24,8 @@ class TestSemanticWithRDFGraph():
             self.annot_map = flat_to_annotations(annot_file)
 
         self.graph.load_ic_map(self.annot_map)
-        self.semantic_sim = SemanticSim(self.graph)
-        self.semantic_dist = SemanticDist(self.graph)
+        self.ic_semsim = ICSemSim(self.graph)
+        self.graph_semsim = GraphSemSim(self.graph)
 
     @classmethod
     def teardown_class(self):

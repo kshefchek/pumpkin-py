@@ -1,20 +1,24 @@
 from typing import Dict, Set, TextIO, Optional, Tuple
-from pyroaring import FrozenBitMap
 import csv
+from pyroaring import FrozenBitMap
 from bidict import bidict
-from ..graph.CacheGraph import CacheGraph
-from ..models.Namespace import Namespace, namespace
+from ..graph.cache_graph import CacheGraph
+from ..graph.ic_graph import ICGraph
+from ..store.ic_store import ICStore
+from ..models.namespace import Namespace, namespace
+from ..utils.ic_utils import make_ic_map
 
 
-def build_ordered_graph(
+def build_ic_graph(
         closure_file: TextIO,
         root: str,
         annotations: Optional[Dict[str, Set[str]]] = None
-) -> CacheGraph:
+) -> ICGraph:
     """
-    There's an awkward two-way dependency on an ordered cached graph
+    There's an awkward two-way dependency on an ic graph
     and an ic store.  An ic store requires a graph object, and
-    an ordered graph requires an ic store (to order integer encoded phenotypes)
+    an ic graph requires an ic store to initialize its descendent and ancestor bitmaps
+    and sort them in ascending order for faster mica calcs - intersection().max()
 
     :param closure_file:
       text I/O stream such as returned by open(), containing a two column file with
@@ -28,50 +32,27 @@ def build_ordered_graph(
     ancestors, descendants = _get_closures(closure_file, root)
 
     tmp_graph = CacheGraph(root, id_map, ancestors, descendants)
-    tmp_graph.load_ic_map(annotations)
+    unsorted_ic = make_ic_map(tmp_graph, annotations)
 
-    sorted_ic_map = zip(*sorted(
-        [(cls, ic) for cls, ic in tmp_graph.ic_map.items()],
+    sorted_ic_twotuple = sorted(
+        [(cls, ic) for cls, ic in unsorted_ic.items()],
         key=lambda x: x[1]
-    ))
+    )
     # Int encode in ascending order
     id = 0
-    for node in next(sorted_ic_map):
-        id_map[node] = id
-        id += 1
-
-    ancestors, descendants, namespace_map = _make_bitmaps(
-        id_map, ancestors, descendants
-    )
-
-    return CacheGraph(root, id_map, ancestors, descendants, namespace_map, is_ordered=True)
-
-
-def build_graph(closure_file: TextIO, root: str) -> CacheGraph:
-    """
-    Build unordered cache graph
-
-    :param closure_file:
-      text I/O stream such as returned by open(), containing a two column file with
-      parent-child class relationships with transitive relationships enumerated
-    :param root: root class as  curie formatted string
-
-    :return: CacheGraph object with is_ordered=False
-    """
+    ic_map = {}
     id_map = bidict()
-    ancestors, descendants = _get_closures(closure_file, root)
-
-    # Int encode non ordered
-    id = 0
-    for node in descendants[root]:
+    for node, ic in sorted_ic_twotuple:
         id_map[node] = id
+        ic_map[id] = ic
         id += 1
 
     ancestors, descendants, namespace_map = _make_bitmaps(
         id_map, ancestors, descendants
     )
+    ic_store = ICStore(ic_map=ic_map, id_map=id_map)
 
-    return CacheGraph(root, id_map, ancestors, descendants, namespace_map, is_ordered=False)
+    return ICGraph(root, id_map, ancestors, descendants, ic_store, namespace_map)
 
 
 def _get_closures(
@@ -134,7 +115,7 @@ def _make_bitmaps(
     :return: Tuple of ancestors, descendants, namespace
     """
     namespace_map = {}
-    anscestor_bmap = {}
+    ancestor_bmap = {}
     descendant_bmap = {}
 
     for ns in namespace.keys():
@@ -144,10 +125,10 @@ def _make_bitmaps(
         )
 
     for node in ancestors.keys():
-        anscestor_bmap[node] = FrozenBitMap([id_map[node] for node in ancestors[node]])
+        ancestor_bmap[node] = FrozenBitMap([id_map[node] for node in ancestors[node]])
 
     for node in descendants.keys():
         descendant_bmap[node] = FrozenBitMap([id_map[node] for node in descendants[node]])
 
-    return anscestor_bmap, descendant_bmap, namespace_map
+    return ancestor_bmap, descendant_bmap, namespace_map
 
