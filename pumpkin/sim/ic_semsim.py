@@ -43,37 +43,6 @@ class ICSemSim:
     def __init__(self, graph: ICGraph):
         self.graph = graph
 
-    def sim_gic(
-            self,
-            profile_a: Iterable[str],
-            profile_b: Iterable[str]
-    ) -> float:
-        """
-        Summed resnik similarity:
-        Summed information content of common ancestors divided by summed
-        information content of all ancestors in profile a and profile b
-        https://bmcbioinformatics.biomedcentral.com/track/
-        pdf/10.1186/1471-2105-9-S5-S4
-
-        Equivalent to jaccard if you were to replace 0s and 1s with
-        information content
-        """
-        # Filter out negative phenotypes
-        profile_a = {pheno for pheno in profile_a if not pheno[0] == "-"}
-        profile_b = {pheno for pheno in profile_b if not pheno[0] == "-"}
-
-        a_closure = self.graph.get_profile_closure(profile_a)
-        b_closure = self.graph.get_profile_closure(profile_b)
-
-        numerator = sum(
-            [self.graph.ic_store.ic_map[pheno] for pheno in a_closure.intersection(b_closure)]
-        )
-        denominator = sum(
-            [self.graph.ic_store.ic_map[pheno] for pheno in a_closure.union(b_closure)]
-        )
-
-        return numerator/denominator
-
     def resnik_sim(
             self,
             profile_a: Iterable[str],
@@ -217,6 +186,37 @@ class ICSemSim:
             dtype=np.float64
         )
 
+    def sim_gic(
+            self,
+            profile_a: Iterable[str],
+            profile_b: Iterable[str]
+    ) -> float:
+        """
+        Summed resnik similarity:
+        Summed information content of common ancestors divided by summed
+        information content of all ancestors in profile a and profile b
+        https://bmcbioinformatics.biomedcentral.com/track/
+        pdf/10.1186/1471-2105-9-S5-S4
+
+        Equivalent to jaccard if you were to replace 0s and 1s with
+        information content
+        """
+        # Filter out negative phenotypes
+        profile_a = {pheno for pheno in profile_a if not pheno[0] == "-"}
+        profile_b = {pheno for pheno in profile_b if not pheno[0] == "-"}
+
+        a_closure = self.graph.get_profile_closure(profile_a)
+        b_closure = self.graph.get_profile_closure(profile_b)
+
+        numerator = sum(
+            [self.graph.ic_store.ic_map[pheno] for pheno in a_closure.intersection(b_closure)]
+        )
+        denominator = sum(
+            [self.graph.ic_store.ic_map[pheno] for pheno in a_closure.union(b_closure)]
+        )
+
+        return numerator/denominator
+
     def _make_row(
             self,
             pheno_a: str,
@@ -225,10 +225,8 @@ class ICSemSim:
     )-> List[float]:
 
         if sim_measure == PairwiseSim.GEOMETRIC:
-            #sim_fn = metric.jac_ic_geomean
             row = [metric.jac_ic_geomean(pheno_a, pheno_b, self.graph) for pheno_b in profile_b]
         elif sim_measure == PairwiseSim.IC:
-            #sim_fn = self.graph.get_mica_ic
             row = [self.graph.get_mica_ic(pheno_a, pheno_b) for pheno_b in profile_b]
         else:
             raise NotImplementedError

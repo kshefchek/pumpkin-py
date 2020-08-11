@@ -1,8 +1,7 @@
 from typing import Iterable, Dict, List, Union, Optional
 from enum import Enum
-from ..graph.graph import Graph
+from ..graph.ic_graph import ICGraph
 from . import metric, matrix
-from ..utils import sim_utils
 import numpy as np
 
 
@@ -19,7 +18,7 @@ class SemanticDist():
 
     def __init__(
             self,
-            graph: Graph,
+            graph: ICGraph,
     ):
         self.graph = graph
 
@@ -41,16 +40,14 @@ class SemanticDist():
         profile_a = {pheno for pheno in profile_a if not pheno.startswith("-")}
         profile_b = {pheno for pheno in profile_b if not pheno.startswith("-")}
 
-        a_closure = sim_utils.get_profile_closure(
-            profile_a, self.graph)
-        b_closure = sim_utils.get_profile_closure(
-            profile_b, self.graph)
+        a_closure = self.graph.get_profile_closure(profile_a)
+        b_closure = self.graph.get_profile_closure(profile_b)
 
         all_phenotypes = a_closure.union(b_closure)
 
-        a_vector = np.array([self.graph.ic_map[item] if
+        a_vector = np.array([self.graph.ic_store.ic_map[item] if
                              item in a_closure else 0 for item in all_phenotypes])
-        b_vector = np.array([self.graph.ic_map[item] if
+        b_vector = np.array([self.graph.ic_store.ic_map[item] if
                             item in b_closure else 0 for item in all_phenotypes])
 
         return np.linalg.norm(a_vector - b_vector)

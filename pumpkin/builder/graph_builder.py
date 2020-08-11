@@ -1,15 +1,66 @@
 from typing import Dict, Set, TextIO, Optional, Tuple
 import csv
+
 from pyroaring import FrozenBitMap
 from bidict import bidict
-from ..graph.cache_graph import CacheGraph
+from rdflib import Graph as RDFLibGraph
+from rdflib import URIRef, BNode, Literal, RDFS, util
+
+from ..graph.graph import Graph
 from ..graph.ic_graph import ICGraph
 from ..store.ic_store import ICStore
 from ..models.namespace import Namespace, namespace
 from ..utils.ic_utils import make_ic_map
 
 
-def build_ic_graph(
+def build_graph_from_rdflib(iri: str, root: str):
+    """
+    Build graph using RDFLib
+
+    Easier for testing small ontologies and datasets without robot
+    :param iri:
+    :param root:
+    :return:
+    """
+    ancestors = {}
+    descendants = {}
+    graph = RDFLibGraph()
+    graph.load(iri, format=util.guess_format(iri))
+    id_map = bidict()
+    id = 0
+    descendants[root] = get_descendants(root, graph)
+    for node in descendants[root]:
+        id_map[node] = id
+        id += 1
+        ancestors[node] = get_ancestors(node, graph, root)
+        descendants[node] = get_descendants(node, graph)
+
+    ancestors, descendants, namespace_map = _make_bitmaps(
+        id_map, ancestors, descendants
+    )
+
+    return Graph(root, id_map, ancestors, descendants, namespace_map)
+
+
+def build_graph_from_closures(
+        ancestors: Dict[str, Set[str]],
+        descendants: Dict[str, Set[str]],
+        root: str
+) -> Graph:
+    id_map = bidict()
+    id = 0
+    for node in descendants[root]:
+        id_map[node] = id
+        id += 1
+
+    ancestors, descendants, namespace_map = _make_bitmaps(
+        id_map, ancestors, descendants
+    )
+
+    return Graph(root, id_map, ancestors, descendants, namespace_map)
+
+
+def build_ic_graph_from_closures(
         closure_file: TextIO,
         root: str,
         annotations: Optional[Dict[str, Set[str]]] = None
@@ -28,10 +79,8 @@ def build_ic_graph(
 
     :return: CacheGraph object with is_ordered=True
     """
-    id_map = bidict()
     ancestors, descendants = _get_closures(closure_file, root)
-
-    tmp_graph = CacheGraph(root, id_map, ancestors, descendants)
+    tmp_graph = build_graph_from_closures(ancestors, descendants, root)
     unsorted_ic = make_ic_map(tmp_graph, annotations)
 
     sorted_ic_twotuple = sorted(
@@ -43,7 +92,7 @@ def build_ic_graph(
     ic_map = {}
     id_map = bidict()
     for node, ic in sorted_ic_twotuple:
-        id_map[node] = id
+        id_map[tmp_graph.id_map.inverse[node]] = id
         ic_map[id] = ic
         id += 1
 
@@ -132,3 +181,45 @@ def _make_bitmaps(
 
     return ancestor_bmap, descendant_bmap, namespace_map
 
+
+def get_ancestors(node: str, graph: RDFLibGraph, root: str) -> Set[str]:
+    """
+    Reflexive get_ancestors from an rdflib graph
+    :param node: node as a curie
+    :param graph: RDFLib graph object
+    :return: Set of ancestors
+    """
+    nodes = set()
+    root_seen = {}
+    node = URIRef("http://purl.obolibrary.org/obo/" + node.replace(":", "_"))
+
+    if root is not None:
+        root = URIRef("http://purl.obolibrary.org/obo/" + root.replace(":", "_"))
+        root_seen = {root: 1}
+    for obj in graph.transitive_objects(node, RDFS['subClassOf'], root_seen):
+        if isinstance(obj, Literal) or isinstance(obj, BNode):
+            continue
+        nodes.add(str(obj).replace("http://purl.obolibrary.org/obo/", "").replace("_", ":"))
+
+    # Add root to graph
+    if root is not None:
+        nodes.add(root.replace("http://purl.obolibrary.org/obo/", "").replace("_", ":"))
+
+    return nodes
+
+
+def get_descendants(node: str, graph: RDFLibGraph) -> Set[str]:
+    """
+    Reflexive get_descendants from an rdflib graph
+
+    :param node: node as a curie
+    :param graph: RDFLib graph object
+    :return: Set of descendants
+    """
+    nodes = set()
+    node = URIRef("http://purl.obolibrary.org/obo/" + node.replace(":", "_"))
+    for sub in graph.transitive_subjects(RDFS['subClassOf'], node):
+        if isinstance(sub, Literal):
+            continue
+        nodes.add(str(sub).replace("http://purl.obolibrary.org/obo/", "").replace("_", ":"))
+    return nodes

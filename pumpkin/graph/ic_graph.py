@@ -1,12 +1,12 @@
 from typing import Dict
 from pyroaring import FrozenBitMap
 from bidict import bidict
-from .cache_graph import CacheGraph
+from .graph import Graph
 from ..store.ic_store import ICStore
 from ..models.namespace import Namespace
 
 
-class ICGraph(CacheGraph):
+class ICGraph(Graph):
     """
     A graph implementation that caches ancestors and descendants
     as BitMaps using pyroaring
@@ -55,9 +55,6 @@ class ICGraph(CacheGraph):
         try:
             p1_closure = self.ancestors[pheno_a]
             p2_closure = self.ancestors[pheno_b]
-        except AttributeError:
-            p1_closure = self.get_ancestors(pheno_a)
-            p2_closure = self.get_ancestors(pheno_b)
         except KeyError:
             return 0
 
@@ -80,9 +77,8 @@ class ICGraph(CacheGraph):
         try:
             p1_closure = self.ancestors[pheno_a]
             p2_closure = self.ancestors[pheno_b]
-        except AttributeError:
-            p1_closure = self.get_ancestors(pheno_a)
-            p2_closure = self.get_ancestors(pheno_b)
+        except KeyError:
+            pass  # TODO handle
 
         mica_id = None
 
