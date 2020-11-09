@@ -1,14 +1,12 @@
-from pumpkin.sim.semantic_dist import SemanticDist
-from pumpkin.sim.ic_semsim import ICSemSim
-from pumpkin.sim.graph_semsim import GraphSemSim
-from pumpkin.builder.annotation_builder import flat_to_annotations
-from pumpkin.builder.graph_builder import build_ic_graph_from_closures, build_graph_from_rdflib
 from pathlib import Path
 
+from pumpkin import SemanticDist, ICSemSim, GraphSemSim, flat_to_annotations, \
+    build_ic_graph_from_closures, build_graph_from_rdflib
 
-ontology = Path(__file__).parent / 'resources' / 'ontology.ttl'
-closures = Path(__file__).parent / 'resources' / 'closures.tsv'
-annotations = Path(__file__).parent / 'resources' / 'annotations.tsv'
+
+ontology = Path(__file__).parent / 'resources' / 'mock-hpo' / 'ontology.ttl'
+closures = Path(__file__).parent / 'resources' / 'mock-hpo' / 'closures.tsv'
+annotations = Path(__file__).parent / 'resources' / 'mock-hpo' / 'annotations.tsv'
 epsilon = 1e-3
 
 

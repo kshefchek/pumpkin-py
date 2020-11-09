@@ -1,10 +1,10 @@
 from pathlib import Path
 import timeit
 import gzip
-from pumpkin.sim.ic_semsim import ICSemSim, PairwiseSim
-from pumpkin.sim.graph_semsim import GraphSemSim
-from pumpkin.builder.annotation_builder import flat_to_annotations
-from pumpkin.builder.graph_builder import build_ic_graph
+
+# Linters will show PairwiseSim is unused
+from pumpkin import ICSemSim, PairwiseSim, GraphSemSim, \
+    flat_to_annotations, build_ic_graph_from_closures
 
 
 closures = Path(__file__).parent / 'resources' / 'upheno-closures.tsv.gz'
@@ -19,17 +19,10 @@ with gzip.open(annotations, 'rt') as annot_file:
     annot_map = flat_to_annotations(annot_file)
 
 with gzip.open(closures, 'rt') as closure_file:
-    graph = build_ic_graph(closure_file, root, annot_map)
+    graph = build_ic_graph_from_closures(closure_file, root, annot_map)
 
 with gzip.open(g2p, 'rt') as annot_file:
     mouse_genes = flat_to_annotations(annot_file)
-
-#print("Calculating information content")
-#graph.load_ic_map(annot_map)
-
-#outfile_path = g2p = Path(__file__).parent / 'resources' / 'ic_store.npy'
-#with open(outfile_path, 'wb') as outfile:
-#    ic_store = ICStore(store=load_ic_store(graph, outfile))
 
 
 ic_sim = ICSemSim(graph)

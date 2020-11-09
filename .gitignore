@@ -2,6 +2,8 @@
 resources/annotations
 resources/bin
 resources/closures
+notes.txt
+tests/resources/mock-hpo/*svg
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

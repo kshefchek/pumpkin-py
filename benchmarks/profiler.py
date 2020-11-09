@@ -3,9 +3,8 @@ import gzip
 import cProfile, pstats, io
 from pstats import SortKey
 
-from pumpkin.graph.cache_graph import CacheGraph
-from pumpkin.io import flat_to_annotations, flat_to_graph
-from pumpkin.sim.semantic_sim import SemanticSim, PairwiseSim
+from pumpkin import ICSemSim, PairwiseSim, GraphSemSim, \
+    flat_to_annotations, build_ic_graph_from_closures
 
 
 closures = Path(__file__).parent / 'resources' / 'upheno-closures.tsv.gz'
@@ -20,17 +19,14 @@ with gzip.open(annotations, 'rt') as annot_file:
     annot_map = flat_to_annotations(annot_file)
 
 with gzip.open(closures, 'rt') as closure_file:
-    id_map, ancestors, descendants = flat_to_graph(closure_file, root, annot_map)
-
-graph = CacheGraph(root, id_map, ancestors, descendants, is_ordered=True)
+    graph = build_ic_graph_from_closures(closure_file, root, annot_map)
 
 with gzip.open(g2p, 'rt') as annot_file:
     mouse_genes = flat_to_annotations(annot_file)
 
-print("Calculating information content")
-graph.load_ic_map(annot_map)
+ic_sim = ICSemSim(graph)
+graph_sim = GraphSemSim(graph)
 
-semantic_sim = SemanticSim(graph)
 
 profile_a = "HP:0000403,HP:0000518,HP:0000565,HP:0000767," \
             "HP:0000872,HP:0001257,HP:0001263,HP:0001290," \
@@ -45,7 +41,7 @@ pr = cProfile.Profile()
 pr.enable()
 
 for profile_b in mouse_genes.values():
-    semantic_sim.phenodigm_compare(profile_a, profile_b, sim_measure=PairwiseSim.IC)
+    ic_sim.phenodigm_compare(profile_a, profile_b, sim_measure=PairwiseSim.IC)
 
 pr.disable()
 s = io.StringIO()

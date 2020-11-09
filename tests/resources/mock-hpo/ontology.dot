@@ -1,0 +1,42 @@
+digraph { 
+ node [ fontname="DejaVu Sans" ] ; 
+	node0 -> node1 [ color=BLACK, label=< <font point-size='10' color='#336633'>rdfs:subClassOf</font> > ] ;
+	node1 -> node2 [ color=BLACK, label=< <font point-size='10' color='#336633'>rdfs:subClassOf</font> > ] ;
+	node3 -> node4 [ color=BLACK, label=< <font point-size='10' color='#336633'>rdfs:subClassOf</font> > ] ;
+	node5 -> node6 [ color=BLACK, label=< <font point-size='10' color='#336633'>rdfs:subClassOf</font> > ] ;
+	node5 -> node3 [ color=BLACK, label=< <font point-size='10' color='#336633'>rdfs:subClassOf</font> > ] ;
+	node7 -> node8 [ color=BLACK, label=< <font point-size='10' color='#336633'>rdfs:subClassOf</font> > ] ;
+	node9 -> node7 [ color=BLACK, label=< <font point-size='10' color='#336633'>rdfs:subClassOf</font> > ] ;
+	node6 -> node4 [ color=BLACK, label=< <font point-size='10' color='#336633'>rdfs:subClassOf</font> > ] ;
+	node10 -> node3 [ color=BLACK, label=< <font point-size='10' color='#336633'>rdfs:subClassOf</font> > ] ;
+	node2 -> node11 [ color=BLACK, label=< <font point-size='10' color='#336633'>rdfs:subClassOf</font> > ] ;
+	node12 -> node0 [ color=BLACK, label=< <font point-size='10' color='#336633'>rdfs:subClassOf</font> > ] ;
+	node8 -> node2 [ color=BLACK, label=< <font point-size='10' color='#336633'>rdfs:subClassOf</font> > ] ;
+	node4 -> node2 [ color=BLACK, label=< <font point-size='10' color='#336633'>rdfs:subClassOf</font> > ] ;
+# http://purl.obolibrary.org/obo/HP_G node0
+node0 [ shape=none, color=black label=< <table color='#666666' cellborder='0' cellspacing='0' border='1'><tr><td colspan='2' bgcolor='grey'><B>G</B></td></tr><tr><td href='http://purl.obolibrary.org/obo/HP_G' bgcolor='#eeeeee' colspan='2'><font point-size='10' color='#6666ff'>http://purl.obolibrary.org/obo/HP_G</font></td></tr></table> > ] 
+# http://purl.obolibrary.org/obo/HP_C node1
+node1 [ shape=none, color=black label=< <table color='#666666' cellborder='0' cellspacing='0' border='1'><tr><td colspan='2' bgcolor='grey'><B>C</B></td></tr><tr><td href='http://purl.obolibrary.org/obo/HP_C' bgcolor='#eeeeee' colspan='2'><font point-size='10' color='#6666ff'>http://purl.obolibrary.org/obo/HP_C</font></td></tr></table> > ] 
+# http://purl.obolibrary.org/obo/HP_0000118 node2
+node2 [ shape=none, color=black label=< <table color='#666666' cellborder='0' cellspacing='0' border='1'><tr><td colspan='2' bgcolor='grey'><B>0000118</B></td></tr><tr><td href='http://purl.obolibrary.org/obo/HP_0000118' bgcolor='#eeeeee' colspan='2'><font point-size='10' color='#6666ff'>http://purl.obolibrary.org/obo/HP_0000118</font></td></tr></table> > ] 
+# http://purl.obolibrary.org/obo/HP_E node3
+node3 [ shape=none, color=black label=< <table color='#666666' cellborder='0' cellspacing='0' border='1'><tr><td colspan='2' bgcolor='grey'><B>E</B></td></tr><tr><td href='http://purl.obolibrary.org/obo/HP_E' bgcolor='#eeeeee' colspan='2'><font point-size='10' color='#6666ff'>http://purl.obolibrary.org/obo/HP_E</font></td></tr></table> > ] 
+# http://purl.obolibrary.org/obo/HP_A node4
+node4 [ shape=none, color=black label=< <table color='#666666' cellborder='0' cellspacing='0' border='1'><tr><td colspan='2' bgcolor='grey'><B>A</B></td></tr><tr><td href='http://purl.obolibrary.org/obo/HP_A' bgcolor='#eeeeee' colspan='2'><font point-size='10' color='#6666ff'>http://purl.obolibrary.org/obo/HP_A</font></td></tr></table> > ] 
+# http://purl.obolibrary.org/obo/HP_H node5
+node5 [ shape=none, color=black label=< <table color='#666666' cellborder='0' cellspacing='0' border='1'><tr><td colspan='2' bgcolor='grey'><B>H</B></td></tr><tr><td href='http://purl.obolibrary.org/obo/HP_H' bgcolor='#eeeeee' colspan='2'><font point-size='10' color='#6666ff'>http://purl.obolibrary.org/obo/HP_H</font></td></tr></table> > ] 
+# http://purl.obolibrary.org/obo/HP_D node6
+node6 [ shape=none, color=black label=< <table color='#666666' cellborder='0' cellspacing='0' border='1'><tr><td colspan='2' bgcolor='grey'><B>D</B></td></tr><tr><td href='http://purl.obolibrary.org/obo/HP_D' bgcolor='#eeeeee' colspan='2'><font point-size='10' color='#6666ff'>http://purl.obolibrary.org/obo/HP_D</font></td></tr></table> > ] 
+# http://purl.obolibrary.org/obo/HP_F node7
+node7 [ shape=none, color=black label=< <table color='#666666' cellborder='0' cellspacing='0' border='1'><tr><td colspan='2' bgcolor='grey'><B>F</B></td></tr><tr><td href='http://purl.obolibrary.org/obo/HP_F' bgcolor='#eeeeee' colspan='2'><font point-size='10' color='#6666ff'>http://purl.obolibrary.org/obo/HP_F</font></td></tr></table> > ] 
+# http://purl.obolibrary.org/obo/HP_B node8
+node8 [ shape=none, color=black label=< <table color='#666666' cellborder='0' cellspacing='0' border='1'><tr><td colspan='2' bgcolor='grey'><B>B</B></td></tr><tr><td href='http://purl.obolibrary.org/obo/HP_B' bgcolor='#eeeeee' colspan='2'><font point-size='10' color='#6666ff'>http://purl.obolibrary.org/obo/HP_B</font></td></tr></table> > ] 
+# http://purl.obolibrary.org/obo/HP_K node9
+node9 [ shape=none, color=black label=< <table color='#666666' cellborder='0' cellspacing='0' border='1'><tr><td colspan='2' bgcolor='grey'><B>K</B></td></tr><tr><td href='http://purl.obolibrary.org/obo/HP_K' bgcolor='#eeeeee' colspan='2'><font point-size='10' color='#6666ff'>http://purl.obolibrary.org/obo/HP_K</font></td></tr></table> > ] 
+# http://purl.obolibrary.org/obo/HP_I node10
+node10 [ shape=none, color=black label=< <table color='#666666' cellborder='0' cellspacing='0' border='1'><tr><td colspan='2' bgcolor='grey'><B>I</B></td></tr><tr><td href='http://purl.obolibrary.org/obo/HP_I' bgcolor='#eeeeee' colspan='2'><font point-size='10' color='#6666ff'>http://purl.obolibrary.org/obo/HP_I</font></td></tr></table> > ] 
+# http://purl.obolibrary.org/obo/HP_0000001 node11
+node11 [ shape=none, color=black label=< <table color='#666666' cellborder='0' cellspacing='0' border='1'><tr><td colspan='2' bgcolor='grey'><B>0000001</B></td></tr><tr><td href='http://purl.obolibrary.org/obo/HP_0000001' bgcolor='#eeeeee' colspan='2'><font point-size='10' color='#6666ff'>http://purl.obolibrary.org/obo/HP_0000001</font></td></tr></table> > ] 
+# http://purl.obolibrary.org/obo/HP_L node12
+node12 [ shape=none, color=black label=< <table color='#666666' cellborder='0' cellspacing='0' border='1'><tr><td colspan='2' bgcolor='grey'><B>L</B></td></tr><tr><td href='http://purl.obolibrary.org/obo/HP_L' bgcolor='#eeeeee' colspan='2'><font point-size='10' color='#6666ff'>http://purl.obolibrary.org/obo/HP_L</font></td></tr></table> > ] 
+}

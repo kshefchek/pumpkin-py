@@ -1,5 +1,5 @@
 import pytest
-from pumpkin.utils.ranker import rerank_ties, RankMethod
+from pumpkin import rerank_ties, RankMethod
 
 
 avg_rank_data = [
@@ -39,7 +39,6 @@ max_rank_data = [
         [2, 2, 3, 4]
     )
 ]
-
 
 
 @pytest.mark.parametrize("input_ranks, expected_ranks", avg_rank_data)
