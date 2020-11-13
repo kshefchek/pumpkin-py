@@ -38,20 +38,6 @@ class ICGraph(Graph):
             raise ValueError("Must use same id_map for graph and ic_store")
 
     def get_mica_ic(self, pheno_a: str, pheno_b: str) -> float:
-        if self.ic_store.store is None:
-            ic = self._get_mica_ic_from_graph(pheno_a, pheno_b)
-        else:
-            ic = self._get_mica_ic_from_store(pheno_a, pheno_b)
-        return ic
-
-    def get_ic(self, node: str) -> float:
-        return self.ic_store.ic_map[self.id_map[node]]
-
-    def _get_mica_ic_from_graph(
-            self,
-            pheno_a: str,
-            pheno_b: str
-    ) -> float:
         try:
             p1_closure = self.ancestors[pheno_a]
             p2_closure = self.ancestors[pheno_b]
@@ -62,14 +48,10 @@ class ICGraph(Graph):
 
         return mica
 
-    def _get_mica_ic_from_store(self, pheno_a: str, pheno_b: str) -> float:
-        id_a = self.id_map[pheno_a]
-        id_b = self.id_map[pheno_b]
-        index = ((id_a * len(self.id_map) - id_a) + id_b) - 1
+    def get_ic(self, node: str) -> float:
+        return self.ic_store.ic_map[self.id_map[node]]
 
-        return self.ic_store.ic_map[self.ic_store.store[index]]
-
-    def _get_mica_from_graph(self, pheno_a: str, pheno_b: str) -> str:
+    def get_mica_id(self, pheno_a: str, pheno_b: str) -> str:
         """
         Return ID of most informative common anscestor of two phenotypes
         Currently does not handle ambiguity (>1 equal MICAs)

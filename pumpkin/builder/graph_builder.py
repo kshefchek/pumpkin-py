@@ -169,8 +169,10 @@ def _make_bitmaps(
 
     for ns in namespace.keys():
         namespace_map[ns] = FrozenBitMap(
-            [id_map[node] for node in id_map.keys()
-             if node.startswith(namespace[ns] + ':')]
+            [
+                id_map[node] for node in id_map.keys()
+                if node.startswith(namespace[ns] + ':') or node.startswith('UPHENO:')
+            ]
         )
 
     for node in ancestors.keys():

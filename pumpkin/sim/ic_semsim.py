@@ -298,7 +298,7 @@ class ICSemSim:
         # Filter out negative phenotypes
 
         profile_union = BitMap.union(
-                *[self.graph.get_profile_closure(profile) for profile in profiles]
+            *[self.graph.get_profile_closure(profile) for profile in profiles]
         )
         profile_intersection = BitMap.intersection(
             *[self.graph.get_profile_closure(profile) for profile in profiles]

@@ -1,5 +1,4 @@
 from typing import Dict, NamedTuple
-from numpy import ndarray
 from bidict import bidict
 
 
@@ -10,4 +9,3 @@ class ICStore(NamedTuple):
     """
     ic_map: Dict[int, float]
     id_map: bidict  # bidict[Dict[str, int]]
-    store: ndarray = None

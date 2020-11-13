@@ -2,16 +2,14 @@ from enum import Enum
 
 
 class Namespace(Enum):
-    UPHENO      = 1
-    HP          = 2
-    MP          = 3
-    ZP          = 4
-    FBcv        = 5
-    WBPhenotype = 6
+    HP          = 1
+    MP          = 2
+    ZP          = 3
+    FBcv        = 4
+    WBPhenotype = 5
 
 
 namespace = {
-    Namespace.UPHENO: 'UPHENO',
     Namespace.HP: 'HP',
     Namespace.MP: 'MP',
     Namespace.ZP: 'ZP',

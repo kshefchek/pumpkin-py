@@ -3,12 +3,10 @@ Utilities for loading parts of an IC store
 
 Alternatively could be part of the ICStore class as methods
 """
-from typing import Dict, Set, BinaryIO
-import numpy as np
+from typing import Dict, Set
 
 from pumpkin.utils.math_utils import information_content
 from ..graph.graph import Graph
-from ..utils.math_utils import binomial_coeff
 
 
 def make_ic_map(graph: Graph, annotations: Dict[str, Set[str]]) -> Dict[int, float]:

@@ -1,4 +1,4 @@
-from typing import Iterable, Dict, List, Union, Optional
+from typing import Iterable, List, Union, Optional
 from enum import Enum
 from ..graph.ic_graph import ICGraph
 from . import metric, matrix
