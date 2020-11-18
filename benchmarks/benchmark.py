@@ -40,7 +40,7 @@ print('Running comparisons')
 
 print('phenodigm: ',
       timeit.timeit(
-          stmt="for profile_b in mouse_genes.values(): ic_sim.phenodigm_compare(profile_a, profile_b, sim_measure=PairwiseSim.IC)",
+          stmt="for profile_b in mouse_genes.values(): ic_sim.phenodigm_compare(profile_a, profile_b, 'MP')",
           globals=globals(),
           number=1
       )
@@ -70,6 +70,7 @@ print('cosine: ',
       )
 )
 
+print(ic_sim.phenodigm_compare(profile_a, profile_b, 'MP'))
 print(ic_sim.phenodigm_compare(profile_a, profile_b))
 print(ic_sim.resnik_sim(profile_a, profile_b))
 print(graph_sim.jaccard_sim(profile_a, profile_b))

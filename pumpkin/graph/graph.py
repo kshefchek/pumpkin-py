@@ -17,7 +17,7 @@ class Graph:
             id_map: bidict,  # Dict[str, int]
             ancestors: Dict[str, FrozenBitMap],
             descendants: Dict[str, FrozenBitMap],
-            namespace_map: Dict[Namespace, FrozenBitMap] = None,
+            namespaces: Dict[Namespace, FrozenBitMap] = None,
     ):
         """
 
@@ -37,7 +37,7 @@ class Graph:
         self.id_map = id_map
         self.ancestors = ancestors
         self.descendants = descendants
-        self.namespace_map = namespace_map
+        self.namespaces = namespaces
 
     def get_ancestors(self, node: str) -> FrozenBitMap:
         try:

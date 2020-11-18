@@ -1,5 +1,7 @@
 from enum import Enum
 
+from bidict import bidict
+
 
 class Namespace(Enum):
     HP          = 1
@@ -9,10 +11,10 @@ class Namespace(Enum):
     WBPhenotype = 5
 
 
-namespace = {
+namespace_map = bidict({
     Namespace.HP: 'HP',
     Namespace.MP: 'MP',
     Namespace.ZP: 'ZP',
     Namespace.FBcv: 'FBcv',
     Namespace.WBPhenotype: 'WBPhenotype',
-}
+})

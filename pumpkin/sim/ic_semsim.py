@@ -3,6 +3,7 @@ from enum import Enum
 import numpy as np
 from pyroaring import BitMap
 from . import metric, matrix
+from ..models.namespace import namespace_map, Namespace
 from .graph_semsim import GraphSemSim
 from ..graph.ic_graph import ICGraph
 from ..utils.math_utils import geometric_mean
@@ -74,10 +75,11 @@ class ICSemSim:
         sim_measure = PairwiseSim.IC
 
         query_matrix = self._get_score_matrix(
-            profile_a, profile_b, sim_measure)
+            profile_a, profile_b, sim_measure
+        )
 
         if is_normalized:
-            optimal_matrix = self._get_optimal_matrix(
+            optimal_matrix = self._get_self_vs_self(
                 profile_a, sim_measure=sim_measure)
         else:
             optimal_matrix = None
@@ -85,7 +87,7 @@ class ICSemSim:
         resnik_score = 0
         if is_symmetric:
             b2a_matrix = matrix.flip_matrix(query_matrix)
-            optimal_b_matrix = self._get_optimal_matrix(
+            optimal_b_matrix = self._get_self_vs_self(
                 profile_b, sim_measure=sim_measure)
             resnik_score = np.mean(
                 [self._compute_resnik_score(
@@ -105,7 +107,7 @@ class ICSemSim:
             query_matrix: List[List[float]],
             optimal_matrix: Optional[List[List[float]]] = None,
             matrix_metric: Optional[MatrixMetric] = MatrixMetric.BMA
-    )-> float:
+    ) -> float:
 
         is_normalized = True if optimal_matrix else False
 
@@ -136,8 +138,8 @@ class ICSemSim:
             self,
             profile_a: Iterable[str],
             profile_b: Iterable[str],
+            ns_filter: Optional[str] = None,
             is_symmetric: Optional[bool] = False,
-            is_same_species: Optional[bool] = True,
             sim_measure: Optional[PairwiseSim] = PairwiseSim.GEOMETRIC
     ) -> Union[float, np.ndarray]:
         """
@@ -156,16 +158,22 @@ class ICSemSim:
         profile_b = {pheno for pheno in profile_b if not pheno[0] == "-"}
 
         query_matrix = self._get_score_matrix(profile_a, profile_b, sim_measure)
-        if is_same_species:
-            optimal_matrix = self._get_optimal_matrix(
-                profile_a, is_same_species, sim_measure)
+
+        if ns_filter:
+            optimal_matrix = self._get_score_matrix(
+                profile_a, profile_a, sim_measure, namespace_map.inverse[ns_filter]
+            )
         else:
-            raise NotImplementedError
+            optimal_matrix = self._get_self_vs_self(profile_a, sim_measure)
 
         if is_symmetric:
             b2a_matrix = matrix.flip_matrix(query_matrix)
-            optimal_b_matrix = self._get_optimal_matrix(
-                profile_b, is_same_species, sim_measure)
+            if ns_filter:
+                optimal_b_matrix = self._get_score_matrix(
+                    profile_b, profile_b, sim_measure, namespace_map.inverse[ns_filter]
+                )
+            else:
+                optimal_b_matrix = self._get_self_vs_self(profile_b, sim_measure)
             score = np.mean(
                 [self.compute_phenodigm_score(query_matrix, optimal_matrix),
                  self.compute_phenodigm_score(b2a_matrix, optimal_b_matrix)],
@@ -221,13 +229,14 @@ class ICSemSim:
             self,
             pheno_a: str,
             profile_b: Iterable,
-            sim_measure: PairwiseSim = PairwiseSim.IC
-    )-> List[float]:
+            sim_measure: Optional[PairwiseSim] = PairwiseSim.IC,
+            ns_filter: Optional[Namespace] = None
+    ) -> List[float]:
 
         if sim_measure == PairwiseSim.GEOMETRIC:
-            row = [metric.jac_ic_geomean(pheno_a, pheno_b, self.graph) for pheno_b in profile_b]
+            row = [metric.jac_ic_geomean(pheno_a, pheno_b, self.graph, ns_filter) for pheno_b in profile_b]
         elif sim_measure == PairwiseSim.IC:
-            row = [self.graph.get_mica_ic(pheno_a, pheno_b) for pheno_b in profile_b]
+            row = [self.graph.get_mica_ic(pheno_a, pheno_b, ns_filter) for pheno_b in profile_b]
         else:
             raise NotImplementedError
 
@@ -237,11 +246,14 @@ class ICSemSim:
             self,
             profile_a: Iterable[str],
             profile_b: Iterable[str],
-            sim_measure: PairwiseSim = PairwiseSim.IC
+            sim_measure: PairwiseSim = PairwiseSim.IC,
+            ns_filter: Optional[Namespace] = None
     ) -> List[List[float]]:
 
-        return [self._make_row(pheno_a, profile_b, sim_measure)
-                for pheno_a in profile_a]
+        return [
+            self._make_row(pheno_a, profile_b, sim_measure, ns_filter)
+            for pheno_a in profile_a
+        ]
 
     def symmetric_resnik_bma(
             self,
@@ -277,11 +289,14 @@ class ICSemSim:
             self,
             profile_a: Iterable[str],
             profile_b: Iterable[str],
-            is_same_species: Optional[bool] = True,
+            ns_filter: Optional[str] = None,
             sim_measure: Union[PairwiseSim, str, None] = PairwiseSim.GEOMETRIC
     ) -> float:
         return self.phenodigm_compare(
-            profile_a, profile_b, True, is_same_species, sim_measure
+            profile_a, profile_b,
+            ns_filter=ns_filter,
+            is_symmetric=True,
+            sim_measure=sim_measure
         )
 
     def groupwise_sim_gic(
@@ -313,25 +328,22 @@ class ICSemSim:
 
         return numerator/denominator
 
-    def _get_optimal_matrix(
+    def _get_self_vs_self(
             self,
             profile: Iterable[str],
-            is_same_species: Optional[bool] = True,
-            sim_measure: Union[PairwiseSim, None] = PairwiseSim.IC
+            sim_measure: Optional[PairwiseSim] = PairwiseSim.IC
     ) -> List[List[float]]:
         """
-        Only implemented for same species comparisons
+        Get the optimal matrix to convert the score to a percentage
         """
         score_matrix = []
-        if is_same_species:
-            for pheno in profile:
-                if sim_measure == PairwiseSim.GEOMETRIC:
-                    score_matrix.append(
-                        [geometric_mean([1, self.graph.get_ic(pheno)])])
-                elif sim_measure == PairwiseSim.IC:
-                    score_matrix.append([self.graph.get_ic(pheno)])
-                else:
-                    raise NotImplementedError
-        else:
-            raise NotImplementedError
+        for pheno in profile:
+            if sim_measure == PairwiseSim.GEOMETRIC:
+                score_matrix.append(
+                    [geometric_mean([1, self.graph.get_ic(pheno)])])
+            elif sim_measure == PairwiseSim.IC:
+                score_matrix.append([self.graph.get_ic(pheno)])
+            else:
+                raise NotImplementedError
+
         return score_matrix

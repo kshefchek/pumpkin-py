@@ -9,7 +9,7 @@ from rdflib import URIRef, BNode, Literal, RDFS, util
 from ..graph.graph import Graph
 from ..graph.ic_graph import ICGraph
 from ..store.ic_store import ICStore
-from ..models.namespace import Namespace, namespace
+from ..models.namespace import Namespace, namespace_map
 from ..utils.ic_utils import make_ic_map
 
 
@@ -35,11 +35,11 @@ def build_graph_from_rdflib(iri: str, root: str):
         ancestors[node] = get_ancestors(node, graph, root)
         descendants[node] = get_descendants(node, graph)
 
-    ancestors, descendants, namespace_map = _make_bitmaps(
+    ancestors, descendants, namespaces = _make_bitmaps(
         id_map, ancestors, descendants
     )
 
-    return Graph(root, id_map, ancestors, descendants, namespace_map)
+    return Graph(root, id_map, ancestors, descendants, namespaces)
 
 
 def build_graph_from_closures(
@@ -53,11 +53,11 @@ def build_graph_from_closures(
         id_map[node] = id
         id += 1
 
-    ancestors, descendants, namespace_map = _make_bitmaps(
+    ancestors, descendants, namespaces = _make_bitmaps(
         id_map, ancestors, descendants
     )
 
-    return Graph(root, id_map, ancestors, descendants, namespace_map)
+    return Graph(root, id_map, ancestors, descendants, namespaces)
 
 
 def build_ic_graph_from_closures(
@@ -96,12 +96,12 @@ def build_ic_graph_from_closures(
         ic_map[id] = ic
         id += 1
 
-    ancestors, descendants, namespace_map = _make_bitmaps(
+    ancestors, descendants, namespaces = _make_bitmaps(
         id_map, ancestors, descendants
     )
     ic_store = ICStore(ic_map=ic_map, id_map=id_map)
 
-    return ICGraph(root, id_map, ancestors, descendants, ic_store, namespace_map)
+    return ICGraph(root, id_map, ancestors, descendants, ic_store, namespaces)
 
 
 def _get_closures(
@@ -163,15 +163,15 @@ def _make_bitmaps(
 
     :return: Tuple of ancestors, descendants, namespace
     """
-    namespace_map = {}
+    namespaces = {}
     ancestor_bmap = {}
     descendant_bmap = {}
 
-    for ns in namespace.keys():
-        namespace_map[ns] = FrozenBitMap(
+    for ns_enum, ns_string in namespace_map.items():
+        namespaces[ns_enum] = FrozenBitMap(
             [
                 id_map[node] for node in id_map.keys()
-                if node.startswith(namespace[ns] + ':') or node.startswith('UPHENO:')
+                if node.startswith(ns_string + ':') or node.startswith('UPHENO:')
             ]
         )
 
@@ -181,7 +181,7 @@ def _make_bitmaps(
     for node in descendants.keys():
         descendant_bmap[node] = FrozenBitMap([id_map[node] for node in descendants[node]])
 
-    return ancestor_bmap, descendant_bmap, namespace_map
+    return ancestor_bmap, descendant_bmap, namespaces
 
 
 def get_ancestors(node: str, graph: RDFLibGraph, root: str) -> Set[str]:
