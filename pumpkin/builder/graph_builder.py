@@ -4,7 +4,7 @@ import csv
 from pyroaring import FrozenBitMap
 from bidict import bidict
 from rdflib import Graph as RDFLibGraph
-from rdflib import URIRef, BNode, Literal, RDFS, util
+from rdflib import URIRef, BNode, Literal, RDFS, util, OWL
 
 from ..graph.graph import Graph
 from ..graph.ic_graph import ICGraph
@@ -187,6 +187,15 @@ def _make_bitmaps(
 def get_ancestors(node: str, graph: RDFLibGraph, root: str) -> Set[str]:
     """
     Reflexive get_ancestors from an rdflib graph
+
+    Currently traverses subClassOf, equivalentClass outgoing,
+    equivalentClass incoming
+
+    Note that this doesn't search mixed predicate paths up the graph, so paths like
+    subClassOf - equivalentClass - subClassOf will not be included in
+    the closure, but our ontology construction should not include this
+    pattern, and RDFLib should only be used for testing anyway
+
     :param node: node as a curie
     :param graph: RDFLib graph object
     :return: Set of ancestors
@@ -202,6 +211,16 @@ def get_ancestors(node: str, graph: RDFLibGraph, root: str) -> Set[str]:
         if isinstance(obj, Literal) or isinstance(obj, BNode):
             continue
         nodes.add(str(obj).replace("http://purl.obolibrary.org/obo/", "").replace("_", ":"))
+
+    for obj in graph.transitive_objects(node, OWL['equivalentClass'], root_seen):
+        if isinstance(obj, Literal) or isinstance(obj, BNode):
+            continue
+        nodes.add(str(obj).replace("http://purl.obolibrary.org/obo/", "").replace("_", ":"))
+
+    for sub in graph.transitive_subjects(OWL['equivalentClass'], node, root_seen):
+        if isinstance(sub, Literal) or isinstance(sub, BNode):
+            continue
+        nodes.add(str(sub).replace("http://purl.obolibrary.org/obo/", "").replace("_", ":"))
 
     # Add root to graph
     if root is not None:

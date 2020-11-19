@@ -5,6 +5,6 @@ PREFIX HP: <http://purl.obolibrary.org/obo/HP_>
 
 SELECT ?sub ?obj
 WHERE {
-    ?sub (rdfs:subClassOf|BFO:0000050|owl:equivalentClass)* HP:0000118 .
-    ?sub (rdfs:subClassOf|BFO:0000050|owl:equivalentClass)* ?obj .
+    ?sub (rdfs:subClassOf|owl:equivalentClass)* HP:0000118 .
+    ?sub (rdfs:subClassOf|owl:equivalentClass)* ?obj .
 }

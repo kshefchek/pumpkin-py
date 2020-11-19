@@ -5,6 +5,6 @@ PREFIX UPHENO: <http://purl.obolibrary.org/obo/UPHENO_>
 
 SELECT ?sub ?obj
 WHERE {
-    ?sub (rdfs:subClassOf|BFO:0000050|owl:equivalentClass)* UPHENO:0001001 .
-    ?sub (rdfs:subClassOf|BFO:0000050|owl:equivalentClass)* ?obj .
+    ?sub (rdfs:subClassOf|BFO:0000050|owl:equivalentClass|^owl:equivalentClass|^BFO:0000051)* UPHENO:0001001 .
+    ?sub (rdfs:subClassOf|BFO:0000050|owl:equivalentClass|^owl:equivalentClass|^BFO:0000051)* ?obj .
 }

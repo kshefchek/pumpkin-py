@@ -1,7 +1,7 @@
 # Project specific
-resources/annotations
-resources/bin
-resources/closures
+data/monarch/annotations
+data/monarch/bin
+data/monarch/closures
 notes.txt
 tests/resources/mock-hpo/*svg
 

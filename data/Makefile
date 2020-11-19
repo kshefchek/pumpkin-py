@@ -20,9 +20,16 @@ ANNOTATION_FILES = \
 
 CURIFY = sed 's@<http://purl.obolibrary.org/obo/\([A-Za-z]*\)_\([A-Za-z0-9]*\)>@\1:\2@g'
 
-all: $(ANNOTATION_FILES) bin/robot.jar closures/hp-closures.tsv \
-     closures/hp-labels.tsv closures/metazoa-slim.owl \
-     closures/upheno-closures.tsv closures/upheno-labels.tsv \
+all: $(ANNOTATION_FILES) \
+     bin/robot.jar \
+     closures/hp-closures.tsv \
+     closures/hp-labels.tsv \
+     closures/upheno-1.owl \
+     closures/upheno-1-closures.tsv \
+     closures/upheno-1-labels.tsv \
+     closures/upheno-2.owl \
+     closures/upheno-2-closures.tsv \
+     closures/upheno-2-labels.tsv \
      annotations/all-annotations.tsv
 
 bin/:
@@ -69,10 +76,10 @@ tmp/hp-labels.tsv: | tmp/
 	    --query sparql/hp-labels.rq \
 		$@
 
-closures/metazoa-slim.owl: | closures/
+closures/upheno-1.owl: | closures/
 	$(ROBOT) \
 	  merge \
-	    --input-iri http://purl.obolibrary.org/obo/upheno/metazoa.owl \
+	    --input-iri https://data.monarchinitiative.org/upheno2/current/upheno-release/all/upheno_old_metazoa.owl \
  	  remove \
 	    --axioms "disjoint" \
 	  remove \
@@ -85,17 +92,33 @@ closures/metazoa-slim.owl: | closures/
 	    --select "anonymous individuals <http://purl.obolibrary.org/obo/IAO*> <http://www.geneontology.org/formats/oboInOwl*>" \
 	    --output $@
 
-tmp/upheno-closures.tsv: closures/metazoa-slim.owl tmp/
+closures/upheno-2.owl: | closures/
+	$(ROBOT) \
+	  merge \
+	    --input-iri https://data.monarchinitiative.org/upheno2/current/upheno-release/all/upheno_lattice_model.owl \
+ 	  remove \
+	    --axioms "disjoint" \
+	  remove \
+	    --term owl:Nothing \
+	    --term rdfs:comment \
+	  reason \
+	    --reasoner ELK \
+	    --axiom-generators "SubClass EquivalentClass" \
+	  remove \
+	    --select "anonymous individuals <http://purl.obolibrary.org/obo/IAO*> <http://www.geneontology.org/formats/oboInOwl*>" \
+	    --output $@
+
+tmp/upheno1-closures.tsv: closures/upheno-1.owl tmp/
 	$(ROBOT) \
 	  query \
-	    --input closures/metazoa-slim.owl \
+	    --input closures/upheno-1.owl \
 	    --query sparql/upheno-closures.rq \
 		$@
 
-tmp/upheno-labels.tsv: closures/metazoa-slim.owl tmp/
+tmp/upheno1-labels.tsv: closures/upheno-1.owl tmp/
 	$(ROBOT) \
 	  query \
-	    --input closures/metazoa-slim.owl \
+	    --input closures/upheno-1.owl \
 	    --query sparql/upheno-labels.rq \
 		$@
 
@@ -108,14 +131,20 @@ annotations/all-annotations.tsv: $(ANNOTATION_FILES)
 	    annotations/Caenorhabditis_elegans/Ce_gene_phenotype.txt \
 	    > $@
 
-closures/upheno-labels.tsv: tmp/upheno-labels.tsv
+closures/upheno-1-closures.tsv: tmp/upheno-1-closures.tsv
 	$(CURIFY) $< | sed 's/^?/#/' > $@
 
-closures/hp-labels.tsv: tmp/hp-labels.tsv
+closures/upheno-1-labels.tsv: tmp/upheno-1-labels.tsv
 	$(CURIFY) $< | sed 's/^?/#/' > $@
 
-closures/upheno-closures.tsv: tmp/upheno-closures.tsv
+closures/upheno-2-closures.tsv: tmp/upheno-2-closures.tsv
+	$(CURIFY) $< | sed 's/^?/#/' > $@
+
+closures/upheno-2-labels.tsv: tmp/upheno-2-labels.tsv
 	$(CURIFY) $< | sed 's/^?/#/' > $@
 
 closures/hp-closures.tsv: tmp/hp-closures.tsv
+	$(CURIFY) $< | sed 's/^?/#/' > $@
+
+closures/hp-labels.tsv: tmp/hp-labels.tsv
 	$(CURIFY) $< | sed 's/^?/#/' > $@
