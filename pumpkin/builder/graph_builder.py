@@ -1,5 +1,6 @@
 from typing import Dict, Set, TextIO, Optional, Tuple
 import csv
+from collections import defaultdict
 
 from pyroaring import FrozenBitMap
 from bidict import bidict
@@ -119,22 +120,15 @@ def _get_closures(
 
     :return: Tuple of ancestors Dict[str, Set[str]], and descendants Dict[str, Set[str]]
     """
-    ancestors = {}
-    descendants = {}
+    ancestors = defaultdict(set)
+    descendants = defaultdict(set)
     reader = csv.reader(closure_file, delimiter='\t', quotechar='\"')
     for row in reader:
         if row[0].startswith('#'): continue
         (node_a, node_b) = row[0:2]
 
-        try:
-            descendants[node_b].add(node_a)
-        except KeyError:
-            descendants[node_b] = {node_a}
-
-        try:
-            ancestors[node_a].add(node_b)
-        except KeyError:
-            ancestors[node_a] = {node_b}
+        descendants[node_b].add(node_a)
+        ancestors[node_a].add(node_b)
 
     # Remove ancestors above the root (eg owl:Class, HP:0000001)
     for node in ancestors.keys():
