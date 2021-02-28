@@ -1,3 +1,10 @@
+MAKEFLAGS += --warn-undefined-variables
+MAKEFLAGS += --no-builtin-rules
+MAKEFLAGS += --no-builtin-variables
+
+.DEFAULT_GOAL := all
+SHELL := bash
+
 WGET = /usr/bin/wget --timestamping --no-verbose
 
 MONARCH = https://archive.monarchinitiative.org/latest/owlsim/data/
@@ -20,6 +27,7 @@ ANNOTATION_FILES = \
 
 CURIFY = sed 's@<http://purl.obolibrary.org/obo/\([A-Za-z]*\)_\([A-Za-z0-9]*\)>@\1:\2@g'
 
+.PHONY: all
 all: $(ANNOTATION_FILES) \
      bin/robot.jar \
      closures/hp-closures.tsv \
@@ -108,17 +116,31 @@ closures/upheno-2.owl: | closures/
 	    --select "anonymous individuals <http://purl.obolibrary.org/obo/IAO*> <http://www.geneontology.org/formats/oboInOwl*>" \
 	    --output $@
 
-tmp/upheno1-closures.tsv: closures/upheno-1.owl tmp/
+tmp/upheno-1-closures.tsv: closures/upheno-1.owl tmp/
 	$(ROBOT) \
 	  query \
 	    --input closures/upheno-1.owl \
 	    --query sparql/upheno-closures.rq \
 		$@
 
-tmp/upheno1-labels.tsv: closures/upheno-1.owl tmp/
+tmp/upheno-1-labels.tsv: closures/upheno-1.owl tmp/
 	$(ROBOT) \
 	  query \
 	    --input closures/upheno-1.owl \
+	    --query sparql/upheno-labels.rq \
+		$@
+
+tmp/upheno-2-closures.tsv: closures/upheno-2.owl tmp/
+	$(ROBOT) \
+	  query \
+	    --input closures/upheno-2.owl \
+	    --query sparql/upheno-closures.rq \
+		$@
+
+tmp/upheno-2-labels.tsv: closures/upheno-2.owl tmp/
+	$(ROBOT) \
+	  query \
+	    --input closures/upheno-2.owl \
 	    --query sparql/upheno-labels.rq \
 		$@
 
@@ -131,20 +153,20 @@ annotations/all-annotations.tsv: $(ANNOTATION_FILES)
 	    annotations/Caenorhabditis_elegans/Ce_gene_phenotype.txt \
 	    > $@
 
-closures/upheno-1-closures.tsv: tmp/upheno-1-closures.tsv
+closures/upheno-1-closures.tsv: tmp/upheno-1-closures.tsv closures/
 	$(CURIFY) $< | sed 's/^?/#/' > $@
 
-closures/upheno-1-labels.tsv: tmp/upheno-1-labels.tsv
+closures/upheno-1-labels.tsv: tmp/upheno-1-labels.tsv closures/
 	$(CURIFY) $< | sed 's/^?/#/' > $@
 
-closures/upheno-2-closures.tsv: tmp/upheno-2-closures.tsv
+closures/upheno-2-closures.tsv: tmp/upheno-2-closures.tsv closures/
 	$(CURIFY) $< | sed 's/^?/#/' > $@
 
-closures/upheno-2-labels.tsv: tmp/upheno-2-labels.tsv
+closures/upheno-2-labels.tsv: tmp/upheno-2-labels.tsv closures/
 	$(CURIFY) $< | sed 's/^?/#/' > $@
 
-closures/hp-closures.tsv: tmp/hp-closures.tsv
+closures/hp-closures.tsv: tmp/hp-closures.tsv closures/
 	$(CURIFY) $< | sed 's/^?/#/' > $@
 
-closures/hp-labels.tsv: tmp/hp-labels.tsv
+closures/hp-labels.tsv: tmp/hp-labels.tsv closures/
 	$(CURIFY) $< | sed 's/^?/#/' > $@
