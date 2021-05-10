@@ -10,7 +10,7 @@ from rdflib import URIRef, BNode, Literal, RDFS, util, OWL
 from ..graph.graph import Graph
 from ..graph.ic_graph import ICGraph
 from ..store.ic_store import ICStore
-from ..models.namespace import Namespace, namespace_map
+from ..models.namespace import Namespace
 from ..utils.ic_utils import make_ic_map
 
 
@@ -161,11 +161,11 @@ def _make_bitmaps(
     ancestor_bmap = {}
     descendant_bmap = {}
 
-    for ns_enum, ns_string in namespace_map.items():
-        namespaces[ns_enum] = FrozenBitMap(
+    for ns in Namespace:
+        namespaces[ns] = FrozenBitMap(
             [
                 id_map[node] for node in id_map.keys()
-                if node.startswith(ns_string + ':') or node.startswith('UPHENO:')
+                if node.startswith(ns.value + ':') or node.startswith('UPHENO:')
             ]
         )
 

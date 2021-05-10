@@ -46,6 +46,14 @@ print('phenodigm: ',
       )
 )
 
+print('phenodigm no-ns: ',
+      timeit.timeit(
+          stmt="for profile_b in mouse_genes.values(): ic_sim.phenodigm_compare(profile_a, profile_b)",
+          globals=globals(),
+          number=1
+      )
+)
+
 print('resnik: ',
       timeit.timeit(
           stmt="for profile_b in mouse_genes.values(): ic_sim.resnik_sim(profile_a, profile_b)",
