@@ -46,7 +46,7 @@ print('phenodigm: ',
       )
 )
 
-print('phenodigm no-ns: ',
+print('phenodigm no ns filter: ',
       timeit.timeit(
           stmt="for profile_b in mouse_genes.values(): ic_sim.phenodigm_compare(profile_a, profile_b)",
           globals=globals(),

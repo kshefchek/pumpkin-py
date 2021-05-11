@@ -8,11 +8,6 @@ from pyroaring import FrozenBitMap
 from ..graph.ic_graph import ICGraph
 from ..models.namespace import Namespace
 
-from diskcache import Cache
-import tempfile
-
-cache = Cache(tempfile.gettempdir())
-
 
 # Union type for numbers
 Num = Union[int, float]
@@ -104,7 +99,6 @@ def jac_ic_geomean(
     return jaccard_ic_geometric_mean(jaccard_sim, mica)
 
 
-@lru_cache(maxsize=None)
 def jaccard_ic_geometric_mean(jaccard_sim: Num, mica: Num) -> float:
     geom_mean = 0
     if jaccard_sim != 0 and mica != 0:

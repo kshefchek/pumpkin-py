@@ -10,10 +10,10 @@ The goal of this project was to build an implementation of the PhenoDigm algorit
 
 ##### Getting Started
 
-Requires python3-dev to install pyroaring
+Requires python 3.8+ and python3-dev to install pyroaring
 
  ```
-python3.7 -m venv venv
+python3.8 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 export PYTHONPATH=.:$PYTHONPATH
@@ -26,7 +26,7 @@ Uses robot and sparql to generate closures and class labels
 Annotation data is fetched from the latest Monarch release
  - Requires >Java 8
  
-```cd resources && make```
+```cd data/monarch/ && make```
 
 
 PhenoDigm Reference: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3649640/  
