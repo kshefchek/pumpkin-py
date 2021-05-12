@@ -6,6 +6,8 @@ from pstats import SortKey
 from pumpkin import ICSemSim, PairwiseSim, GraphSemSim, \
     flat_to_annotations, build_ic_graph_from_closures
 
+from pumpkin.sim.metric import jac_ic_geomean, jaccard_ic_geometric_mean
+
 
 closures = Path(__file__).parent / 'resources' / 'upheno-closures.tsv.gz'
 annotations = Path(__file__).parent / 'resources' / 'all-annotations.tsv.gz'
@@ -37,11 +39,21 @@ profile_b = "HP:0000496,HP:0005257,HP:0008773,HP:0010307," \
 
 print('Running comparisons')
 
+for profile_b in mouse_genes.values():
+    ic_sim.phenodigm_compare(profile_a, profile_b, sim_measure=PairwiseSim.GEOMETRIC, ns_filter='MP')
+
+print('Profiling')
 pr = cProfile.Profile()
 pr.enable()
 
 for profile_b in mouse_genes.values():
-    ic_sim.phenodigm_compare(profile_a, profile_b, sim_measure=PairwiseSim.IC)
+    ic_sim.phenodigm_compare(profile_a, profile_b, sim_measure=PairwiseSim.IC, ns_filter='MP')
+
+print(f"geometric_mean cache info: {jac_ic_geomean.cache_info()}")
+#print(f"geometric_mean inner fx cache info: {jaccard_ic_geometric_mean.cache_info()}")
+#print(f"graph cache info: {graph._get_int_encoded_mica.cache_info()}")
+
+
 
 pr.disable()
 s = io.StringIO()

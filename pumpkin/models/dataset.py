@@ -1,14 +1,14 @@
 from enum import Enum
 
 
-class Dataset(Enum):
-    DISEASE        = 1
-    MOUSE_GENE     = 2
-    ZFISH_GENE     = 3
-    FLY_GENE       = 4
-    WORM_GENE      = 5
-    CASE           = 6
-    MOUSE_GENOTYPE = 7
-    ZFISH_GENOTYPE = 8
-    FLY_ALLELE     = 9
-    ALL            = 10
+class Dataset(str, Enum):
+    DISEASE        = 'DISEASE'
+    MOUSE_GENE     = 'MOUSE_GENE'
+    ZFISH_GENE     = 'ZFISH_GENE'
+    FLY_GENE       = 'FLY_GENE'
+    WORM_GENE      = 'WORM_GENE'
+    CASE           = 'CASE'
+    MOUSE_GENOTYPE = 'MOUSE_GENOTYPE'
+    ZFISH_GENOTYPE = 'ZFISH_GENOTYPE'
+    FLY_ALLELE     = 'FLY_ALLELE'
+    ALL            = 'ALL'

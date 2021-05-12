@@ -1,10 +1,10 @@
 from typing import Union, Optional
 import math
+from statistics import geometric_mean
+from functools import lru_cache
 
-from pyroaring import BitMap
+from pyroaring import FrozenBitMap
 
-from ..utils.math_utils import geometric_mean
-from ..graph.graph import Graph
 from ..graph.ic_graph import ICGraph
 from ..models.namespace import Namespace
 
@@ -13,14 +13,25 @@ from ..models.namespace import Namespace
 Num = Union[int, float]
 
 
-def jaccard(set1: BitMap, set2: BitMap) -> float:
+def jaccard(set1: FrozenBitMap, set2: FrozenBitMap) -> float:
     return set1.jaccard_index(set2)
 
 
+@lru_cache(maxsize=None)
+def mica_ic(
+        pheno_a: str,
+        pheno_b: str,
+        graph: ICGraph,
+        ns_filter: Optional[Namespace] = None
+) -> float:
+    return graph.get_mica_ic(pheno_a, pheno_b, ns_filter)
+
+
+#@lru_cache(maxsize=None)
 def pairwise_jaccard(
         pheno_a: str,
         pheno_b: str,
-        graph: Graph,
+        graph: ICGraph,
         ns_filter: Optional[Namespace] = None
 ) -> float:
     """
@@ -28,7 +39,7 @@ def pairwise_jaccard(
 
     Namespace filter applies only to pheno_b, and looks up
     the nearest mica with the namespace and uses that node
-    to computer the jaccard index
+    to compute the jaccard index
     """
 
     if ns_filter:
@@ -76,6 +87,7 @@ def jin_conrath_distance(
     return ic_a + ic_b - 2 * max_ic
 
 
+@lru_cache(maxsize=None)
 def jac_ic_geomean(
         pheno_a: str,
         pheno_b: str,
@@ -84,4 +96,11 @@ def jac_ic_geomean(
 ) -> float:
     jaccard_sim = pairwise_jaccard(pheno_a, pheno_b, graph, ns_filter)
     mica = graph.get_mica_ic(pheno_a, pheno_b, ns_filter)
-    return geometric_mean([jaccard_sim, mica])
+    return jaccard_ic_geometric_mean(jaccard_sim, mica)
+
+
+def jaccard_ic_geometric_mean(jaccard_sim: Num, mica: Num) -> float:
+    geom_mean = 0
+    if jaccard_sim != 0 and mica != 0:
+        geom_mean = geometric_mean([jaccard_sim, mica])
+    return geom_mean

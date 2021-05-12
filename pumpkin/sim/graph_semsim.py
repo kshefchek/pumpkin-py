@@ -121,7 +121,6 @@ class GraphSemSim:
 
         return metric.jaccard(pheno_a_set, pheno_b_set)
 
-
     def groupwise_jaccard(
             self,
             profiles: Iterable[Iterable[str]]

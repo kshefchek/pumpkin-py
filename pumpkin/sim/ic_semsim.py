@@ -1,28 +1,30 @@
 from typing import Iterable, List, Union, Optional
 from enum import Enum
+from statistics import geometric_mean
+
 import numpy as np
 from pyroaring import BitMap
+
 from . import metric, matrix
-from ..models.namespace import namespace_map, Namespace
+from ..models.namespace import Namespace
 from .graph_semsim import GraphSemSim
 from ..graph.ic_graph import ICGraph
-from ..utils.math_utils import geometric_mean
 
 
 # Union types
 Num = Union[int, float]
 
 
-class PairwiseSim(Enum):
-    GEOMETRIC = 1
-    IC        = 2
-    JACCARD   = 3
+class PairwiseSim(str, Enum):
+    GEOMETRIC = 'GEOMETRIC'
+    IC        = 'IC'
+    JACCARD   = 'JACCARD'
 
 
-class MatrixMetric(Enum):
-    MAX = 1  # Max
-    AVG = 2  # Average
-    BMA = 3  # Best Match Average
+class MatrixMetric(str, Enum):
+    MAX = 'MAX'  # Max
+    AVG = 'AVG'  # Average
+    BMA = 'BMA'  # Best Match Average
 
 
 class ICSemSim:
@@ -138,7 +140,7 @@ class ICSemSim:
             self,
             profile_a: Iterable[str],
             profile_b: Iterable[str],
-            ns_filter: Optional[str] = None,
+            ns_filter: Optional[Union[str, Namespace]] = None,
             is_symmetric: Optional[bool] = False,
             sim_measure: Optional[PairwiseSim] = PairwiseSim.GEOMETRIC
     ) -> Union[float, np.ndarray]:
@@ -161,7 +163,7 @@ class ICSemSim:
 
         if ns_filter:
             optimal_matrix = self._get_score_matrix(
-                profile_a, profile_a, sim_measure, namespace_map.inverse[ns_filter]
+                profile_a, profile_a, sim_measure, ns_filter
             )
         else:
             optimal_matrix = self._get_self_vs_self(profile_a, sim_measure)
@@ -170,7 +172,7 @@ class ICSemSim:
             b2a_matrix = matrix.flip_matrix(query_matrix)
             if ns_filter:
                 optimal_b_matrix = self._get_score_matrix(
-                    profile_b, profile_b, sim_measure, namespace_map.inverse[ns_filter]
+                    profile_b, profile_b, sim_measure, ns_filter
                 )
             else:
                 optimal_b_matrix = self._get_self_vs_self(profile_b, sim_measure)
@@ -230,13 +232,13 @@ class ICSemSim:
             pheno_a: str,
             profile_b: Iterable,
             sim_measure: Optional[PairwiseSim] = PairwiseSim.IC,
-            ns_filter: Optional[Namespace] = None
+            ns_filter: Optional[Union[str, Namespace]] = None
     ) -> List[float]:
 
         if sim_measure == PairwiseSim.GEOMETRIC:
             row = [metric.jac_ic_geomean(pheno_a, pheno_b, self.graph, ns_filter) for pheno_b in profile_b]
         elif sim_measure == PairwiseSim.IC:
-            row = [self.graph.get_mica_ic(pheno_a, pheno_b, ns_filter) for pheno_b in profile_b]
+            row = [metric.mica_ic(pheno_a, pheno_b, self.graph, ns_filter) for pheno_b in profile_b]
         else:
             raise NotImplementedError
 
@@ -247,7 +249,7 @@ class ICSemSim:
             profile_a: Iterable[str],
             profile_b: Iterable[str],
             sim_measure: PairwiseSim = PairwiseSim.IC,
-            ns_filter: Optional[Namespace] = None
+            ns_filter: Optional[Union[str, Namespace]] = None
     ) -> List[List[float]]:
 
         return [
@@ -289,7 +291,7 @@ class ICSemSim:
             self,
             profile_a: Iterable[str],
             profile_b: Iterable[str],
-            ns_filter: Optional[str] = None,
+            ns_filter: Optional[Union[str, Namespace]] = None,
             sim_measure: Union[PairwiseSim, str, None] = PairwiseSim.GEOMETRIC
     ) -> float:
         return self.phenodigm_compare(
@@ -331,7 +333,7 @@ class ICSemSim:
     def _get_self_vs_self(
             self,
             profile: Iterable[str],
-            sim_measure: Optional[PairwiseSim] = PairwiseSim.IC
+            sim_measure: Optional[Union[str, PairwiseSim]] = PairwiseSim.IC
     ) -> List[List[float]]:
         """
         Get the optimal matrix to convert the score to a percentage
