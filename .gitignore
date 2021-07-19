@@ -2,6 +2,7 @@
 data/monarch/annotations
 data/monarch/bin
 data/monarch/closures
+data/monarch/tmp
 notes.txt
 tests/resources/mock-hpo/*svg
 

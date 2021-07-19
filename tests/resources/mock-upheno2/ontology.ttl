@@ -1,0 +1,40 @@
+@prefix : <http://purl.obolibrary.org/obo/hp.owl#> .
+@prefix HP: <http://purl.obolibrary.org/obo/HP_> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+HP:0000118 rdfs:subClassOf HP:0000001 .
+
+# First Level
+#############
+
+HP:A rdfs:subClassOf HP:0000118 .
+
+HP:B rdfs:subClassOf HP:0000118 .
+
+HP:C rdfs:subClassOf HP:0000118 .
+
+# Second Level
+##############
+
+HP:D rdfs:subClassOf HP:A .
+
+HP:E rdfs:subClassOf HP:A .
+
+HP:F rdfs:subClassOf HP:B .
+
+HP:G rdfs:subClassOf HP:C .
+
+# Third Level
+##############
+
+#### Multiple parentage, H -> D,E
+HP:H rdfs:subClassOf HP:D .
+
+HP:H rdfs:subClassOf HP:E .
+
+HP:I rdfs:subClassOf HP:E .
+
+HP:K rdfs:subClassOf HP:F .
+
+HP:L rdfs:subClassOf HP:G .
