@@ -1,5 +1,5 @@
-from typing import Optional, Union, List
 from dataclasses import dataclass
+from typing import List, Union
 
 
 @dataclass
@@ -7,6 +7,7 @@ class Node:
     """
     Basic node
     """
+
     id: str
     label: str
 
@@ -16,6 +17,7 @@ class ICNode(Node):
     """
     Node with information content
     """
+
     ic: float
 
 
@@ -24,6 +26,7 @@ class TypedNode(Node):
     """
     Node with type and optional taxon
     """
+
     type: str
     label: str
     taxon: Node
@@ -34,6 +37,7 @@ class SimMatch(TypedNode):
     """
     Data class similarity match
     """
+
     rank: Union[int, str]
     score: Union[float, int]
 
@@ -43,4 +47,5 @@ class SearchResult:
     """
     Data class a list of similarity matches
     """
+
     results: List[SimMatch]

@@ -3,10 +3,10 @@ import gzip
 import cProfile, pstats, io
 from pstats import SortKey
 
-from pumpkin import ICSemSim, PairwiseSim, GraphSemSim, \
+from pumpkin_py import ICSemSim, PairwiseSim, GraphSemSim, \
     flat_to_annotations, build_ic_graph_from_closures
 
-from pumpkin.sim.metric import jac_ic_geomean, jaccard_ic_geometric_mean
+from pumpkin_py.sim.metric import jac_ic_geomean, jaccard_ic_geometric_mean
 
 
 closures = Path(__file__).parent / 'resources' / 'upheno-closures.tsv.gz'

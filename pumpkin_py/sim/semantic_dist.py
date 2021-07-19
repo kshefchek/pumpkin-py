@@ -1,32 +1,28 @@
-from typing import Iterable, List, Union, Optional
 from enum import Enum
-from ..graph.ic_graph import ICGraph
-from . import metric, matrix
+from typing import Iterable, List, Optional, Union
+
 import numpy as np
 
+from ..graph.ic_graph import ICGraph
+from . import matrix, metric
 
 # Union types
 Num = Union[int, float]
 
 
 class PairwiseDist(Enum):
-    EUCLIDEAN   = 'euclidean'
+    EUCLIDEAN = 'euclidean'
     JIN_CONRATH = 'jin_conrath'
 
 
-class SemanticDist():
-
+class SemanticDist:
     def __init__(
-            self,
-            graph: ICGraph,
+        self,
+        graph: ICGraph,
     ):
         self.graph = graph
 
-    def euclidean_distance(
-            self,
-            profile_a: Iterable[str],
-            profile_b: Iterable[str]
-    ) -> float:
+    def euclidean_distance(self, profile_a: Iterable[str], profile_b: Iterable[str]) -> float:
         """
         Groupwise euclidean distance
 
@@ -45,18 +41,26 @@ class SemanticDist():
 
         all_phenotypes = a_closure.union(b_closure)
 
-        a_vector = np.array([self.graph.ic_store.ic_map[item] if
-                             item in a_closure else 0 for item in all_phenotypes])
-        b_vector = np.array([self.graph.ic_store.ic_map[item] if
-                            item in b_closure else 0 for item in all_phenotypes])
+        a_vector = np.array(
+            [
+                self.graph.ic_store.ic_map[item] if item in a_closure else 0
+                for item in all_phenotypes
+            ]
+        )
+        b_vector = np.array(
+            [
+                self.graph.ic_store.ic_map[item] if item in b_closure else 0
+                for item in all_phenotypes
+            ]
+        )
 
         return np.linalg.norm(a_vector - b_vector)
 
     def euclidean_matrix(
-            self,
-            profile_a: Iterable[str],
-            profile_b: Iterable[str],
-            distance_measure: Union[PairwiseDist, str, None] = PairwiseDist.EUCLIDEAN
+        self,
+        profile_a: Iterable[str],
+        profile_b: Iterable[str],
+        distance_measure: Union[PairwiseDist, str, None] = PairwiseDist.EUCLIDEAN,
     ) -> np.ndarray:
         """
         Matrix wise euclidean distance
@@ -71,15 +75,14 @@ class SemanticDist():
         ab_matrix = self._get_score_matrix(profile_a, profile_b, distance_measure)
         ba_matrix = self._get_score_matrix(profile_b, profile_a, distance_measure)
         return np.mean(
-            [matrix.best_min_avg(ab_matrix), matrix.best_min_avg(ba_matrix)],
-            dtype=np.float64
+            [matrix.best_min_avg(ab_matrix), matrix.best_min_avg(ba_matrix)], dtype=np.float64
         )
 
     def _get_score_matrix(
-            self,
-            profile_a: Iterable[str],
-            profile_b: Iterable[str],
-            distance_measure: Optional[PairwiseDist] = PairwiseDist.EUCLIDEAN
+        self,
+        profile_a: Iterable[str],
+        profile_b: Iterable[str],
+        distance_measure: Optional[PairwiseDist] = PairwiseDist.EUCLIDEAN,
     ) -> List[List[float]]:
 
         score_matrix = [[]]

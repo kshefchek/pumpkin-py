@@ -5,7 +5,8 @@ Alternatively could be part of the ICStore class as methods
 """
 from typing import Dict, Set
 
-from pumpkin.utils.math_utils import information_content
+from pumpkin_py.utils.math_utils import information_content
+
 from ..graph.graph import Graph
 
 
@@ -20,10 +21,7 @@ def make_ic_map(graph: Graph, annotations: Dict[str, Set[str]]) -> Dict[int, flo
     """
     ic_map: Dict[int, float] = {}
     explicit_annotations = 0
-    node_annotations = {
-        node: 0
-        for node in graph.get_descendants(graph.root)
-    }
+    node_annotations = {node: 0 for node in graph.get_descendants(graph.root)}
     for profile in annotations.values():
         for node in profile:
             has_ancestors = False

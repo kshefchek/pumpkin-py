@@ -1,7 +1,8 @@
-from typing import List, Optional
 from enum import Enum
-from ..utils.math_utils import binomial_coeff
+from typing import List, Optional
+
 from ..models.result import SearchResult
+from ..utils.math_utils import binomial_coeff
 
 
 class RankMethod(Enum):
@@ -11,8 +12,7 @@ class RankMethod(Enum):
 
 
 def rank_results(
-        search_result: SearchResult,
-        method: Optional[RankMethod] = RankMethod.MIN
+    search_result: SearchResult, method: Optional[RankMethod] = RankMethod.MIN
 ) -> SearchResult:
     """
     Ranks results dealing with ties based on the RankMethod
@@ -21,9 +21,7 @@ def rank_results(
     :param method: method used to rank results
     :return: Sorted results list
     """
-    sorted_results = sorted(
-        search_result.results, reverse=True, key=lambda k: k['score']
-    )
+    sorted_results = sorted(search_result.results, reverse=True, key=lambda k: k['score'])
 
     if len(sorted_results) > 0:
         rank = 1
@@ -46,16 +44,11 @@ def rank_results(
 
 
 def average_ties(previous_rank: int, tie_count: int) -> int:
-    deranked_summed = \
-        binomial_coeff(previous_rank + (tie_count)) - \
-        binomial_coeff(previous_rank)
+    deranked_summed = binomial_coeff(previous_rank + (tie_count)) - binomial_coeff(previous_rank)
     return round(deranked_summed / tie_count)
 
 
-def rerank_ties(
-        ranks: List[int],
-        method: Optional[RankMethod] = RankMethod.AVG
-) -> List[int]:
+def rerank_ties(ranks: List[int], method: Optional[RankMethod] = RankMethod.AVG) -> List[int]:
     """
     Given a list of ranked results, penalizes tied scores
     by taking the average, for example, 4 classes

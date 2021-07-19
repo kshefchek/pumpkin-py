@@ -1,6 +1,6 @@
-from typing import Dict, Set, TextIO
 import csv
 from collections import defaultdict
+from typing import Dict, Set, TextIO
 
 
 def flat_to_annotations(file: TextIO) -> Dict[str, Set[str]]:
@@ -12,7 +12,8 @@ def flat_to_annotations(file: TextIO) -> Dict[str, Set[str]]:
     annotations = defaultdict(set)
     reader = csv.reader(file, delimiter='\t', quotechar='\"')
     for row in reader:
-        if row[0].startswith('#'): continue
+        if row[0].startswith('#'):
+            continue
         (individual, cls) = row[0:2]
         annotations[individual].add(cls)
 

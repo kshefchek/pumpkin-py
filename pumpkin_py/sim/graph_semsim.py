@@ -1,9 +1,10 @@
-from typing import Iterable, Callable, Union, Optional
 import math
-from pyroaring import BitMap
-from . import metric
-from ..graph.graph import Graph
+from typing import Callable, Iterable, Optional, Union
 
+from pyroaring import BitMap
+
+from ..graph.graph import Graph
+from . import metric
 
 # Union types
 Num = Union[int, float]
@@ -22,11 +23,11 @@ class GraphSemSim:
         self.graph = graph
 
     def cosine_sim(
-            self,
-            profile_a: Iterable[str],
-            profile_b: Iterable[str],
-            negative_weight: Optional[Num] = .1,
-            score_lambda: Optional[Callable] = lambda term: 1
+        self,
+        profile_a: Iterable[str],
+        profile_b: Iterable[str],
+        negative_weight: Optional[Num] = 0.1,
+        score_lambda: Optional[Callable] = lambda term: 1,
     ) -> float:
         """
         Cosine similarity
@@ -53,44 +54,45 @@ class GraphSemSim:
         pos_a_closure = self.graph.get_profile_closure(positive_a_profile)
         pos_b_closure = self.graph.get_profile_closure(positive_b_profile)
 
-        neg_a_closure = {"-{}".format(item)
-                         for item in self.graph.get_profile_closure(
-            negative_a_profile, negative=True)
-                         } if negative_a_profile else set()
+        neg_a_closure = (
+            {
+                "-{}".format(item)
+                for item in self.graph.get_profile_closure(negative_a_profile, negative=True)
+            }
+            if negative_a_profile
+            else set()
+        )
 
-        neg_b_closure = {"-{}".format(item)
-                         for item in self.graph.get_profile_closure(
-            negative_b_profile, negative=True)
-                         } if negative_b_profile else set()
+        neg_b_closure = (
+            {
+                "-{}".format(item)
+                for item in self.graph.get_profile_closure(negative_b_profile, negative=True)
+            }
+            if negative_b_profile
+            else set()
+        )
 
         pos_intersect_dot_product = sum(
-            [math.pow(score_lambda(item), 2)
-             for item in pos_a_closure.intersection(pos_b_closure)]
+            [math.pow(score_lambda(item), 2) for item in pos_a_closure.intersection(pos_b_closure)]
         )
 
         neg_intersect_dot_product = sum(
-            [math.pow(score_lambda(item) * negative_weight, 2)
-             for item in neg_a_closure.intersection(neg_b_closure)]
+            [
+                math.pow(score_lambda(item) * negative_weight, 2)
+                for item in neg_a_closure.intersection(neg_b_closure)
+            ]
         )
 
         a_square_dot_product = math.sqrt(
             sum(
                 [math.pow(score_lambda(item), 2) for item in pos_a_closure],
-            ) +
-            sum(
-                [math.pow(score_lambda(item) * negative_weight, 2)
-                 for item in neg_a_closure]
             )
+            + sum([math.pow(score_lambda(item) * negative_weight, 2) for item in neg_a_closure])
         )
 
         b_square_dot_product = math.sqrt(
-            sum(
-                [math.pow(score_lambda(item), 2) for item in pos_b_closure]
-            ) +
-            sum(
-                [math.pow(score_lambda(item) * negative_weight, 2)
-                 for item in neg_b_closure]
-            )
+            sum([math.pow(score_lambda(item), 2) for item in pos_b_closure])
+            + sum([math.pow(score_lambda(item) * negative_weight, 2) for item in neg_b_closure])
         )
 
         numerator = pos_intersect_dot_product + neg_intersect_dot_product
@@ -103,11 +105,7 @@ class GraphSemSim:
 
         return result
 
-    def jaccard_sim(
-            self,
-            profile_a: Iterable[str],
-            profile_b: Iterable[str]
-    ) -> float:
+    def jaccard_sim(self, profile_a: Iterable[str], profile_b: Iterable[str]) -> float:
         """
         Jaccard similarity (intersection/union)
         Negative phenotypes must be prefixed with a '-'
@@ -121,10 +119,7 @@ class GraphSemSim:
 
         return metric.jaccard(pheno_a_set, pheno_b_set)
 
-    def groupwise_jaccard(
-            self,
-            profiles: Iterable[Iterable[str]]
-    ) -> float:
+    def groupwise_jaccard(self, profiles: Iterable[Iterable[str]]) -> float:
         """
         jaccard similarity applied to greater than 2 profiles,
         ie groupwise similarity instead of pairwise
@@ -141,4 +136,4 @@ class GraphSemSim:
             *[self.graph.get_profile_closure(profile) for profile in profiles]
         )
 
-        return len(profile_intersection)/len(profile_union)
+        return len(profile_intersection) / len(profile_union)

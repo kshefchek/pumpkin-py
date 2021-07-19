@@ -1,8 +1,13 @@
 from pathlib import Path
 
-from pumpkin import SemanticDist, ICSemSim, GraphSemSim, flat_to_annotations, \
-    build_ic_graph_from_closures, build_graph_from_rdflib
-
+from pumpkin_py import (
+    GraphSemSim,
+    ICSemSim,
+    SemanticDist,
+    build_graph_from_rdflib,
+    build_ic_graph_from_closures,
+    flat_to_annotations,
+)
 
 ontology = Path(__file__).parent / 'resources' / 'mock-hpo' / 'ontology.ttl'
 closures = Path(__file__).parent / 'resources' / 'mock-hpo' / 'closures.tsv'
@@ -10,8 +15,7 @@ annotations = Path(__file__).parent / 'resources' / 'mock-hpo' / 'annotations.ts
 epsilon = 1e-3
 
 
-class TestGraphSimWithRDFGraph():
-
+class TestGraphSimWithRDFGraph:
     @classmethod
     def setup_class(self):
         root = "HP:0000118"
@@ -28,15 +32,14 @@ class TestGraphSimWithRDFGraph():
         self.graph = None
 
     def test_jaccard(self):
-        expected = .3
+        expected = 0.3
         profile_a = self.annot_map['1']
         profile_b = self.annot_map['2']
         jaccard_sim = self.graph_semsim.jaccard_sim(profile_a, profile_b)
         assert abs(jaccard_sim - expected) < epsilon
 
 
-class TestICSimWithClosureGraph():
-
+class TestICSimWithClosureGraph:
     @classmethod
     def setup_class(self):
         root = "HP:0000118"
@@ -55,7 +58,7 @@ class TestICSimWithClosureGraph():
         self.graph = None
 
     def test_resnik(self):
-        expected = .693
+        expected = 0.693
         profile_a = self.annot_map['1']
         profile_b = self.annot_map['2']
         resnik_sim = self.semantic_sim.resnik_sim(profile_a, profile_b)

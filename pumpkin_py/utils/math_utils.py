@@ -1,8 +1,7 @@
-from typing import Union
 import math
+from typing import Union
 
 import numpy as np
-
 
 # Union type for numbers
 Num = Union[int, float]
@@ -23,4 +22,4 @@ def binomial_coeff(num) -> float:
 def np_geometric_mean(iterable):
     """https://stackoverflow.com/a/43099751"""
     a = np.array(iterable)
-    return a.prod()**(1.0/len(a))
+    return a.prod() ** (1.0 / len(a))

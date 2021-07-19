@@ -1,6 +1,8 @@
-from typing import Dict, Optional, Iterable
-from pyroaring import FrozenBitMap, BitMap
+from typing import Dict, Iterable, Optional
+
 from bidict import bidict
+from pyroaring import BitMap, FrozenBitMap
+
 from ..models.namespace import Namespace
 
 
@@ -12,12 +14,12 @@ class Graph:
     """
 
     def __init__(
-            self,
-            root: str,
-            id_map: bidict,  # Dict[str, int]
-            ancestors: Dict[str, FrozenBitMap],
-            descendants: Dict[str, FrozenBitMap],
-            namespaces: Dict[Namespace, FrozenBitMap] = None,
+        self,
+        root: str,
+        id_map: bidict,  # Dict[str, int]
+        ancestors: Dict[str, FrozenBitMap],
+        descendants: Dict[str, FrozenBitMap],
+        namespaces: Dict[Namespace, FrozenBitMap] = None,
     ):
         """
 
@@ -63,9 +65,7 @@ class Graph:
         return nodes
 
     def get_profile_closure(
-            self,
-            profile: Iterable[str],
-            negative: Optional[bool] = False
+        self, profile: Iterable[str], negative: Optional[bool] = False
     ) -> BitMap:
         """
         Given a list of phenotypes, get the reflexive closure for each phenotype
@@ -74,7 +74,4 @@ class Graph:
 
         This should probably be moved elsewhere as the loan fx here
         """
-        return BitMap.union(
-            *[self.get_closure(node, negative=negative)
-              for node in profile]
-        )
+        return BitMap.union(*[self.get_closure(node, negative=negative) for node in profile])

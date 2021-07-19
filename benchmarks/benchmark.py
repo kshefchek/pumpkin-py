@@ -3,7 +3,7 @@ import timeit
 import gzip
 
 # Linters will show PairwiseSim is unused
-from pumpkin import ICSemSim, PairwiseSim, GraphSemSim, \
+from pumpkin_py import ICSemSim, PairwiseSim, GraphSemSim, \
     flat_to_annotations, build_ic_graph_from_closures
 
 

@@ -1,16 +1,17 @@
-from typing import Dict, Set, TextIO, Optional, Tuple
 import csv
 from collections import defaultdict
+from typing import Dict, Optional, Set, TextIO, Tuple
 
-from pyroaring import FrozenBitMap
 from bidict import bidict
+from pyroaring import FrozenBitMap
+from rdflib import OWL, RDFS, BNode
 from rdflib import Graph as RDFLibGraph
-from rdflib import URIRef, BNode, Literal, RDFS, util, OWL
+from rdflib import Literal, URIRef, util
 
 from ..graph.graph import Graph
 from ..graph.ic_graph import ICGraph
-from ..store.ic_store import ICStore
 from ..models.namespace import Namespace
+from ..store.ic_store import ICStore
 from ..utils.ic_utils import make_ic_map
 
 
@@ -36,17 +37,13 @@ def build_graph_from_rdflib(iri: str, root: str):
         ancestors[node] = get_ancestors(node, graph, root)
         descendants[node] = get_descendants(node, graph)
 
-    ancestors, descendants, namespaces = _make_bitmaps(
-        id_map, ancestors, descendants
-    )
+    ancestors, descendants, namespaces = _make_bitmaps(id_map, ancestors, descendants)
 
     return Graph(root, id_map, ancestors, descendants, namespaces)
 
 
 def build_graph_from_closures(
-        ancestors: Dict[str, Set[str]],
-        descendants: Dict[str, Set[str]],
-        root: str
+    ancestors: Dict[str, Set[str]], descendants: Dict[str, Set[str]], root: str
 ) -> Graph:
     id_map = bidict()
     id = 0
@@ -54,17 +51,13 @@ def build_graph_from_closures(
         id_map[node] = id
         id += 1
 
-    ancestors, descendants, namespaces = _make_bitmaps(
-        id_map, ancestors, descendants
-    )
+    ancestors, descendants, namespaces = _make_bitmaps(id_map, ancestors, descendants)
 
     return Graph(root, id_map, ancestors, descendants, namespaces)
 
 
 def build_ic_graph_from_closures(
-        closure_file: TextIO,
-        root: str,
-        annotations: Optional[Dict[str, Set[str]]] = None
+    closure_file: TextIO, root: str, annotations: Optional[Dict[str, Set[str]]] = None
 ) -> ICGraph:
     """
     There's an awkward two-way dependency on an ic graph
@@ -84,10 +77,7 @@ def build_ic_graph_from_closures(
     tmp_graph = build_graph_from_closures(ancestors, descendants, root)
     unsorted_ic = make_ic_map(tmp_graph, annotations)
 
-    sorted_ic_twotuple = sorted(
-        [(cls, ic) for cls, ic in unsorted_ic.items()],
-        key=lambda x: x[1]
-    )
+    sorted_ic_twotuple = sorted([(cls, ic) for cls, ic in unsorted_ic.items()], key=lambda x: x[1])
     # Int encode in ascending order
     id = 0
     ic_map = {}
@@ -97,17 +87,14 @@ def build_ic_graph_from_closures(
         ic_map[id] = ic
         id += 1
 
-    ancestors, descendants, namespaces = _make_bitmaps(
-        id_map, ancestors, descendants
-    )
+    ancestors, descendants, namespaces = _make_bitmaps(id_map, ancestors, descendants)
     ic_store = ICStore(ic_map=ic_map, id_map=id_map)
 
     return ICGraph(root, id_map, ancestors, descendants, ic_store, namespaces)
 
 
 def _get_closures(
-        closure_file: TextIO,
-        root: str
+    closure_file: TextIO, root: str
 ) -> Tuple[Dict[str, Set[str]], Dict[str, Set[str]]]:
     """
     Convert two column closure file to dictionaries of
@@ -124,7 +111,8 @@ def _get_closures(
     descendants = defaultdict(set)
     reader = csv.reader(closure_file, delimiter='\t', quotechar='\"')
     for row in reader:
-        if row[0].startswith('#'): continue
+        if row[0].startswith('#'):
+            continue
         (node_a, node_b) = row[0:2]
 
         descendants[node_b].add(node_a)
@@ -138,14 +126,8 @@ def _get_closures(
 
 
 def _make_bitmaps(
-        id_map: bidict,
-        ancestors: Dict[str, Set[str]],
-        descendants: Dict[str, Set[str]]
-) -> Tuple[
-    Dict[str, FrozenBitMap],
-    Dict[str, FrozenBitMap],
-    Dict[Namespace, FrozenBitMap]
-]:
+    id_map: bidict, ancestors: Dict[str, Set[str]], descendants: Dict[str, Set[str]]
+) -> Tuple[Dict[str, FrozenBitMap], Dict[str, FrozenBitMap], Dict[Namespace, FrozenBitMap]]:
     """
     Convert ancestor and descendent str:Set dicts to str:bitmap dicts and create
     a namespace str:bitmap dictionary using the namespaces defined
@@ -164,7 +146,8 @@ def _make_bitmaps(
     for ns in Namespace:
         namespaces[ns] = FrozenBitMap(
             [
-                id_map[node] for node in id_map.keys()
+                id_map[node]
+                for node in id_map.keys()
                 if node.startswith(ns.value + ':') or node.startswith('UPHENO:')
             ]
         )
