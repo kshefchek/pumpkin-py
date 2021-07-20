@@ -2,7 +2,7 @@
 Top level package
 """
 
-__version__ = '0.0.1a1'
+__version__ = '0.0.1a2'
 
 from .builder.annotation_builder import flat_to_annotations
 from .builder.graph_builder import build_graph_from_rdflib, build_ic_graph_from_closures

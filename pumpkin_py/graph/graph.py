@@ -42,18 +42,37 @@ class Graph:
         self.namespaces = namespaces
 
     def get_ancestors(self, node: str) -> FrozenBitMap:
+        """
+        TODO make this explicit (eg rename) that the input
+        is a curie and the ouput is a list of integer encoded
+        ids
+
+        perhaps create get_ancestors_by_curie and get_ancestors_by_id
+
+        :param node: Curie formatted string
+        :return: List of integer encoded ids as a FrozenBitMap
+        """
         try:
             nodes = self.ancestors[node]
-        except KeyError:
+        except KeyError as key_error:
+            if not isinstance(node, str):
+                raise key_error
             # TODO handle
             nodes = FrozenBitMap()
         return nodes
 
     def get_descendants(self, node: str) -> FrozenBitMap:
+        """
+
+        :param node: Curie formatted string
+        :return: List of integer encoded ids as a FrozenBitMap
+        """
         try:
             nodes = self.descendants[node]
-        except KeyError:
+        except KeyError as key_error:
             # TODO handle
+            if not isinstance(node, str):
+                raise key_error
             nodes = FrozenBitMap()
         return nodes
 

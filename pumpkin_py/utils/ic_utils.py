@@ -21,6 +21,7 @@ def make_ic_map(graph: Graph, annotations: Dict[str, Set[str]]) -> Dict[int, flo
     """
     ic_map: Dict[int, float] = {}
     explicit_annotations = 0
+    # map of integer encoded node: annotation count
     node_annotations = {node: 0 for node in graph.get_descendants(graph.root)}
     for profile in annotations.values():
         for node in profile:
@@ -35,7 +36,7 @@ def make_ic_map(graph: Graph, annotations: Dict[str, Set[str]]) -> Dict[int, flo
     for node, annot_count in node_annotations.items():
         if annot_count == 0:
             explicit_annotations += 1
-            for ancestor in graph.get_ancestors(node):
+            for ancestor in graph.get_ancestors(graph.id_map.inverse[node]):
                 node_annotations[ancestor] += 1
 
     for node, annot_count in node_annotations.items():
