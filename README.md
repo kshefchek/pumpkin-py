@@ -12,11 +12,15 @@ The goal of this project was to build an implementation of the PhenoDigm algorit
 
 Requires python 3.8+ and python3-dev to install pyroaring
 
- ```
-python3.8 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-export PYTHONPATH=.:$PYTHONPATH
+Installing from pypi
+
+```
+pip install pumpkin_py
+```
+
+Running make will install locally and run the tests
+```
+make
 ```
 
 ###### Fetching annotations and closures
