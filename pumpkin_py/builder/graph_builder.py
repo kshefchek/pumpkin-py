@@ -78,7 +78,8 @@ def build_ic_graph_from_closures(
 
     :return: CacheGraph object with is_ordered=True
     """
-    tmp_graph = build_graph_from_closure_file(closure_file, root)
+    ancestors, descendants = _get_closures(closure_file, root)
+    tmp_graph = build_graph_from_closures(ancestors, descendants, root)
     unsorted_ic = make_ic_map(tmp_graph, annotations)
 
     sorted_ic_twotuple = sorted([(cls, ic) for cls, ic in unsorted_ic.items()], key=lambda x: x[1])
