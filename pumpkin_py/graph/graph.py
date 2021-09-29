@@ -44,7 +44,7 @@ class Graph:
     def get_ancestors(self, node: str) -> FrozenBitMap:
         """
         TODO make this explicit (eg rename) that the input
-        is a curie and the ouput is a list of integer encoded
+        is a curie and the output is a list of integer encoded
         ids
 
         perhaps create get_ancestors_by_curie and get_ancestors_by_id
@@ -90,7 +90,5 @@ class Graph:
         Given a list of phenotypes, get the reflexive closure for each phenotype
         stored in a single set.  This can be used for jaccard similarity or
         simGIC
-
-        This should probably be moved elsewhere as the loan fx here
         """
         return BitMap.union(*[self.get_closure(node, negative=negative) for node in profile])

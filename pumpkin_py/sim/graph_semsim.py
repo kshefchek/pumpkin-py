@@ -1,7 +1,7 @@
 import math
-from typing import Callable, Iterable, Optional, Union
+from typing import Callable, Collection, Iterable, Optional, Union
 
-from pyroaring import BitMap
+from pyroaring import BitMap, FrozenBitMap
 
 from ..graph.graph import Graph
 from . import metric
@@ -127,8 +127,6 @@ class GraphSemSim:
         Useful for quantifying the strength of a cluster of
         profiles (eg disease clustering)
         """
-        # Filter out negative phenotypes
-
         profile_union = BitMap.union(
             *[self.graph.get_profile_closure(profile) for profile in profiles]
         )
@@ -137,3 +135,29 @@ class GraphSemSim:
         )
 
         return len(profile_intersection) / len(profile_union)
+
+    def proportion_subset(
+        self, profile_a: Collection[str], profile_b: Collection[str], compute_inferred: bool = True
+    ) -> float:
+        """
+        The proportion a profile a is subsumed by profile b
+        for example: given two profiles
+        A: {1,2,3,4}
+        B: {3,4,5,6}
+        The proportion A is subsumed by B is 50%
+        """
+        # An empty set is a proper subset of any other set
+        if len(profile_a) == 0 and len(profile_b) >= 0:
+            return 1.0
+        # if profile_a is non empty and profile_b is, proportion is 0
+        elif len(profile_b) == 0:
+            return 0.0
+
+        if compute_inferred:
+            profile_a = self.graph.get_profile_closure(profile_a)
+            profile_b = self.graph.get_profile_closure(profile_b)
+        else:
+            profile_a = FrozenBitMap([self.graph.id_map[node] for node in profile_a])
+            profile_b = FrozenBitMap([self.graph.id_map[node] for node in profile_b])
+
+        return len(BitMap.intersection(profile_a, profile_b)) / len(profile_a)
