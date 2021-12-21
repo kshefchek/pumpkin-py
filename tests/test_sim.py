@@ -7,6 +7,8 @@ from pathlib import Path
 
 import pytest
 
+from pumpkin_py import MatrixMetric  # noqa
+from pumpkin_py import PairwiseSim  # noqa
 from pumpkin_py import (
     GraphSemSim,
     ICSemSim,
