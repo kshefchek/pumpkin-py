@@ -157,23 +157,22 @@ class ICSemSim:
         else:
             optimal_matrix = self._get_self_vs_self(profile_a, sim_measure)
 
+        score = self.compute_phenodigm_score(query_matrix, optimal_matrix)
+
         if is_symmetric:
-            b2a_matrix = matrix.flip_matrix(query_matrix)
-            if ns_filter:
-                optimal_b_matrix = self._get_score_matrix(
-                    profile_b, profile_b, sim_measure, ns_filter
-                )
-            else:
-                optimal_b_matrix = self._get_self_vs_self(profile_b, sim_measure)
             score = np.mean(
                 [
-                    self.compute_phenodigm_score(query_matrix, optimal_matrix),
-                    self.compute_phenodigm_score(b2a_matrix, optimal_b_matrix),
+                    score,
+                    self.phenodigm_compare(
+                        profile_b,
+                        profile_a,
+                        ns_filter=ns_filter,
+                        is_symmetric=False,
+                        sim_measure=sim_measure,
+                    ),
                 ],
                 dtype=np.float64,
             )
-        else:
-            score = self.compute_phenodigm_score(query_matrix, optimal_matrix)
 
         return score
 

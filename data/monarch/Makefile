@@ -9,6 +9,8 @@ WGET = /usr/bin/wget --timestamping --no-verbose
 
 MONARCH = https://archive.monarchinitiative.org/latest/owlsim/data/
 
+ROBOT_JAR = https://github.com/ontodev/robot/releases/latest/download/robot.jar
+
 ROBOT := java -jar bin/robot.jar
 
 ANNOTATION_FILES = \
@@ -38,7 +40,10 @@ all: $(ANNOTATION_FILES) \
      closures/upheno-2.owl \
      closures/upheno-2-closures.tsv \
      closures/upheno-2-labels.tsv \
-     annotations/all-annotations.tsv
+     annotations/all-annotations.tsv \
+
+.PHONY: FORCE
+FORCE:
 
 bin/:
 	mkdir --parents $@
@@ -46,9 +51,8 @@ bin/:
 tmp/:
 	mkdir --parents $@
 
-bin/robot.jar: | bin/
-	curl -L -o bin/robot.jar \
-		https://github.com/ontodev/robot/releases/latest/download/robot.jar
+bin/robot.jar: FORCE | bin/
+	curl -L -o bin/robot.jar $(ROBOT_JAR)
 
 annotations/:
 	mkdir --parents $@
@@ -60,12 +64,10 @@ $(ANNOTATION_FILES): | annotations/
 closures/:
 	mkdir --parents $@
 
-tmp/hp-closures.tsv: | tmp/
+tmp/hp-closures.tsv: FORCE | tmp/
 	$(ROBOT) \
 	  merge \
 	    --input-iri http://purl.obolibrary.org/obo/hp.owl \
-	  reason \
-	    --reasoner ELK \
 	  filter \
 	    --axioms logical \
 	  remove \
@@ -74,7 +76,7 @@ tmp/hp-closures.tsv: | tmp/
 	    --query sparql/hp-closures.rq \
 		$@
 
-tmp/hp-labels.tsv: | tmp/
+tmp/hp-labels.tsv: FORCE | tmp/
 	$(ROBOT) \
 	  merge \
 	    --input-iri http://purl.obolibrary.org/obo/hp.owl \
@@ -84,7 +86,7 @@ tmp/hp-labels.tsv: | tmp/
 	    --query sparql/hp-labels.rq \
 		$@
 
-closures/upheno-1.owl: | closures/
+closures/upheno-1.owl: FORCE | closures/
 	$(ROBOT) \
 	  merge \
 	    --input-iri https://data.monarchinitiative.org/upheno2/current/upheno-release/all/upheno_old_metazoa.owl \
@@ -100,7 +102,7 @@ closures/upheno-1.owl: | closures/
 	    --select "anonymous individuals <http://purl.obolibrary.org/obo/IAO*> <http://www.geneontology.org/formats/oboInOwl*>" \
 	    --output $@
 
-closures/upheno-2.owl: | closures/
+closures/upheno-2.owl: FORCE | closures/
 	$(ROBOT) \
 	  merge \
 	    --input-iri https://data.monarchinitiative.org/upheno2/current/upheno-release/all/upheno_lattice_model.owl \

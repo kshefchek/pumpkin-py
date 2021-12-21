@@ -2,11 +2,17 @@ PumpkinPy - Semantic similarity implemented in python
 
 ##### About
 
-PumpkinPy uses IC ordered bitmaps for fast ranking of genes and diseases.  This is useful for larger ontologies such as Upheno and large datasets such as ranking all mouse genes given a set of input HPO terms.  This approach was first used in OWLTools and OwlSim-v3.
+PumpkinPy uses IC ordered bitmaps for fast ranking of genes and diseases
+(phenotypes are sorted by descending frequency and one-hot encoded).
+This is useful for larger ontologies such as Upheno and large datasets such
+as ranking all mouse genes given a set of input HPO terms.
+This approach was first used in OWLTools and OwlSim-v3.
 
-The goal of this project was to build an implementation of the PhenoDigm algorithm in python. There are also implementations for common measures for distance and similarity (euclidean, cosine, Jin-Conrath, Resnik, jaccard)
+The goal of this project was to build an implementation of the PhenoDigm algorithm in python.
+There are also implementations for common measures for distance and similarity
+(euclidean, cosine, Jin-Conrath, Resnik, jaccard)
 
-*Disclaimer*: This is a side project and has little documetation and only a modest amount of testing
+*Disclaimer*: This is a side project needs more documentation and testing
 
 ##### Getting Started
 
