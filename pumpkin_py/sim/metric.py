@@ -16,7 +16,7 @@ def jaccard(set1: FrozenBitMap, set2: FrozenBitMap) -> float:
     return set1.jaccard_index(set2)
 
 
-@lru_cache(maxsize=1000)
+@lru_cache(maxsize=100000)
 def mica_ic(
     pheno_a: str, pheno_b: str, graph: ICGraph, ns_filter: Optional[Namespace] = None
 ) -> float:
@@ -66,7 +66,7 @@ def jin_conrath_distance(pheno_a: str, pheno_b: str, graph: ICGraph) -> float:
     return ic_a + ic_b - 2 * max_ic
 
 
-@lru_cache(maxsize=1000)
+@lru_cache(maxsize=100000)
 def jac_ic_geomean(
     pheno_a: str, pheno_b: str, graph: ICGraph, ns_filter: Optional[Namespace] = None
 ) -> float:

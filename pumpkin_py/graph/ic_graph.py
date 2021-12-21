@@ -40,7 +40,7 @@ class ICGraph(Graph):
         if ic_store.id_map is not self.id_map:
             raise ValueError("Must use same id_map for graph and ic_store")
 
-    @lru_cache(maxsize=1000)
+    @lru_cache(maxsize=100000)
     def _get_int_encoded_mica(
         self, pheno_a: str, pheno_b: str, ns_filter: Optional[Namespace] = None
     ) -> int:

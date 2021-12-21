@@ -53,8 +53,6 @@ print(f"geometric_mean cache info: {jac_ic_geomean.cache_info()}")
 #print(f"geometric_mean inner fx cache info: {jaccard_ic_geometric_mean.cache_info()}")
 #print(f"graph cache info: {graph._get_int_encoded_mica.cache_info()}")
 
-
-
 pr.disable()
 s = io.StringIO()
 sortby = SortKey.CUMULATIVE
