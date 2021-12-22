@@ -8,14 +8,14 @@ MAKEFLAGS += --no-builtin-variables
 SHELL := bash
 
 .PHONY: all
-all: install-requirements test
+all: install test
 
-.PHONY: install-requirements
-install-requirements:
+.PHONY: install
+install:
 	poetry install
 
 .PHONY: test
-test: install-requirements
+test: install
 	poetry run python -m pytest
 
 .PHONY: build
