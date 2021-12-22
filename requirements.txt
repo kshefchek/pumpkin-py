@@ -1,6 +1,0 @@
-numpy
-pytest
-rdflib
-dataclasses
-pyroaring
-bidict

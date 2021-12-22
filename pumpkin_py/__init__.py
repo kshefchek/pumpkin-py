@@ -2,8 +2,6 @@
 Top level package
 """
 
-__version__ = '0.0.2'
-
 from .builder.annotation_builder import flat_to_annotations
 from .builder.graph_builder import (
     build_graph_from_closure_file,
