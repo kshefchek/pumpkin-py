@@ -8,31 +8,23 @@ MAKEFLAGS += --no-builtin-variables
 SHELL := bash
 
 .PHONY: all
-all: install-flit install-pumpkin-py install-dev test
+all: install-requirements test
 
-.PHONY: install-flit
-install-flit:
-	pip install flit
-
-.PHONY: install-pumpkin-py
-install-pumpkin-py: install-flit
-	flit install --deps production --symlink
-
-.PHONY: install-dev
-install-dev: install-flit
-	flit install --deps develop --symlink
+.PHONY: install-requirements
+install-requirements:
+	poetry install
 
 .PHONY: test
-test: install-flit install-dev
-	python -m pytest
+test: install-requirements
+	poetry run python -m pytest
 
 .PHONY: build
 build:
-	flit build
+	poetry build
 
 .PHONY: publish
 publish:
-	flit publish
+	poetry publish
 
 .PHONY: clean
 clean:
@@ -43,17 +35,25 @@ clean:
 
 .PHONY: lint
 lint:
-	flake8 --exit-zero --max-line-length 120 pumpkin_py/ tests/
-	black --check --diff pumpkin_py tests
-	isort --check-only --diff pumpkin_py tests
+	poetry run flake8 --exit-zero --max-line-length 120 pumpkin_py/ tests/
+	poetry run black --check --diff pumpkin_py tests
+	poetry run isort --check-only --diff pumpkin_py tests
 
 .PHONY: format
 format:
-	autoflake \
+	poetry run autoflake \
 		--recursive \
 		--remove-all-unused-imports \
 		--remove-unused-variables \
 		--ignore-init-module-imports \
 		--in-place pumpkin_py tests
-	isort pumpkin_py tests
-	black pumpkin_py tests
+	poetry run isort pumpkin_py tests
+	poetry run black pumpkin_py tests
+
+.PHONY: benchmark
+benchmark:
+	poetry run python benchmarks/benchmark.py
+
+.PHONY: profile
+profile:
+	poetry run python benchmarks/profiler.py

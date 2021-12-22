@@ -18,16 +18,20 @@ There are also implementations for common measures for distance and similarity
 
 Requires python 3.8+ and python3-dev to install pyroaring
 
-Installing from pypi
+###### Installing from pypi
 
 ```
 pip install pumpkin_py
 ```
 
-Running make will install locally and run the tests
-```
-make
-```
+###### Building locally
+To build locally first install poetry - 
+
+https://python-poetry.org/docs/#installation
+
+Then run make:
+
+```make```
 
 ###### Fetching annotations and closures
 

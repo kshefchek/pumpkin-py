@@ -66,7 +66,7 @@ def jin_conrath_distance(pheno_a: str, pheno_b: str, graph: ICGraph) -> float:
     return ic_a + ic_b - 2 * max_ic
 
 
-@lru_cache(maxsize=100000)
+@lru_cache(maxsize=200000)
 def jac_ic_geomean(
     pheno_a: str, pheno_b: str, graph: ICGraph, ns_filter: Optional[Namespace] = None
 ) -> float:
