@@ -1,3 +1,7 @@
+[![Pyversions](https://img.shields.io/pypi/pyversions/pumpkin-py.svg)](https://pypi.python.org/pypi/koza)
+![](https://github.com/kshefchek/pumpkin-py/actions/workflows/test.yml/badge.svg)
+[![PyPi](https://img.shields.io/pypi/v/pumpkin-py.svg)](https://pypi.python.org/pypi/pumpkin-py)
+
 PumpkinPy - Semantic similarity implemented in python
 
 ##### About
@@ -21,7 +25,7 @@ Requires python 3.8+ and python3-dev to install pyroaring
 ##### Installing from pypi
 
 ```
-pip install pumpkin_py
+pip install pumpkin-py
 ```
 
 ##### Building locally
