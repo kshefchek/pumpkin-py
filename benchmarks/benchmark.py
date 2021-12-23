@@ -2,10 +2,13 @@ from pathlib import Path
 import timeit
 import gzip
 
-from pumpkin_py import PairwiseSim  # noqa
-from pumpkin_py import ICSemSim,GraphSemSim, \
+from pumpkin_py import search # noqa
+from pumpkin_py import get_methods, ICSemSim,GraphSemSim, \
     flat_to_annotations, build_ic_graph_from_closures
 
+
+print("available sim methods")
+print(get_methods())
 
 closures = Path(__file__).parent / 'resources' / 'upheno-closures.tsv.gz'
 annotations = Path(__file__).parent / 'resources' / 'all-annotations.tsv.gz'
@@ -28,6 +31,7 @@ with gzip.open(g2p, 'rt') as annot_file:
 ic_sim = ICSemSim(graph)
 graph_sim = GraphSemSim(graph)
 
+
 profile_a = "HP:0000403,HP:0000518,HP:0000565,HP:0000767," \
             "HP:0000872,HP:0001257,HP:0001263,HP:0001290," \
             "HP:0001629,HP:0002019,HP:0002072".split(',')
@@ -41,7 +45,7 @@ for _ in range(2):
 
     print('phenodigm: ',
           timeit.timeit(
-              stmt="for profile_b in mouse_genes.values(): ic_sim.phenodigm_compare(profile_a, profile_b, 'MP')",
+              stmt="search(profile_a, mouse_genes, graph, 'phenodigm', ns_filter='MP')",
               globals=globals(),
               number=1
           )
@@ -49,7 +53,7 @@ for _ in range(2):
 
     print('phenodigm no ns filter: ',
           timeit.timeit(
-              stmt="for profile_b in mouse_genes.values(): ic_sim.phenodigm_compare(profile_a, profile_b)",
+              stmt="search(profile_a, mouse_genes, graph, 'phenodigm')",
               globals=globals(),
               number=1
           )
@@ -57,7 +61,7 @@ for _ in range(2):
 
     print('resnik: ',
           timeit.timeit(
-              stmt="for profile_b in mouse_genes.values(): ic_sim.resnik_sim(profile_a, profile_b)",
+              stmt="search(profile_a, mouse_genes, graph, 'resnik')",
               globals=globals(),
               number=1
           )
@@ -65,7 +69,7 @@ for _ in range(2):
 
     print('jaccard: ',
           timeit.timeit(
-              stmt="for profile_b in mouse_genes.values(): graph_sim.jaccard_sim(profile_a, profile_b)",
+              stmt="search(profile_a, mouse_genes, graph, 'jaccard')",
               globals=globals(),
               number=1
           )
@@ -73,7 +77,7 @@ for _ in range(2):
 
     print('cosine: ',
           timeit.timeit(
-              stmt="for profile_b in mouse_genes.values(): graph_sim.cosine_sim(profile_a, profile_b)",
+              stmt="search(profile_a, mouse_genes, graph, 'cosine')",
               globals=globals(),
               number=1
           )

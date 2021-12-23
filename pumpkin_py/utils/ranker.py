@@ -5,9 +5,9 @@ from ..models.result import SearchResult
 from ..utils.math_utils import binomial_coeff
 
 
-class RankMethod(Enum):
+class RankMethod(str, Enum):
     MIN = 'min'
-    AVG = 'average'
+    AVG = 'avg'
     MAX = 'max'
 
 
@@ -17,26 +17,42 @@ def rank_results(
     """
     Ranks results dealing with ties based on the RankMethod
 
+    RankMethod.MIN: Ties are given the same rank in the order they appear,
+    eg, 4 scores tied for first are all ranked as 1
+
+    RankMethod.AVG: Ties are averaged, rounding up eg
+    # Input rankings
+    [1, 1, 1, 1, 1, 2, 3, 4, 5, 6, 6, 6, 7, 8],
+    # Expected output rankings
+    [3, 3, 3, 3, 3, 4, 5, 6, 7, 9, 9, 9, 10, 11],
+
+    RankMethod.MAX: Ties are given their max rank, eg
+    # Input rankings
+    [1, 1, 1, 1, 1, 2, 3, 4, 5, 6, 6, 6, 7, 8],
+    # Expected output rankings
+    [5, 5, 5, 5, 5, 6, 7, 8, 9, 12, 12, 12, 13, 14],
+
+
     :param search_result: SimResult
-    :param method: method used to rank results
+    :param method: method used to rank results, see above for examples
     :return: Sorted results list
     """
-    sorted_results = sorted(search_result.results, reverse=True, key=lambda k: k['score'])
+    sorted_results = sorted(search_result.results, reverse=True, key=lambda k: k.score)
 
     if len(sorted_results) > 0:
         rank = 1
-        previous_score = sorted_results[0]['score']
+        previous_score = sorted_results[0].score
         for result in sorted_results:
-            if previous_score > result['score']:
+            if previous_score > result.score:
                 rank += 1
-            result['rank'] = rank
-            previous_score = result['score']
+            result.rank = rank
+            previous_score = result.score
 
         if method != RankMethod.MIN:
-            ranks = [res['rank'] for res in sorted_results]
+            ranks = [res.rank for res in sorted_results]
             new_ranks = rerank_ties(ranks, method)
             for index, result in enumerate(sorted_results):
-                result['rank'] = new_ranks[index]
+                result.rank = new_ranks[index]
 
     search_result.results = sorted_results
 

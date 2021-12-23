@@ -14,6 +14,7 @@ class GraphSemSim:
     """
     Graph based semantic similarity: similarity based on
     common sets of parent terms
+
     Implemented methods:
      1. jaccard (pairwise, groupwise)
      2. cosine (pairwise, negation support)
@@ -42,7 +43,9 @@ class GraphSemSim:
         Inferred phenotypes are computed as parent classes for positive phenotypes
         and child classes for negative phenotypes.  Typically we do not want to
         weight negative phenotypes as high as positive phenotypes.  A weight between
-        .01-.1 may be desirable
+        .01 - .1 may be desirable
+
+        TODO optimize with numpy
         """
 
         positive_a_profile = {item for item in profile_a if not item[0] == '-'}
