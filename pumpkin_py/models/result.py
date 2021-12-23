@@ -33,12 +33,14 @@ class TypedNode(Node):
 
 
 @dataclass
-class SimMatch(TypedNode):
+class SimMatch:
     """
+    #class SimMatch(TypedNode):
     Data class similarity match
     """
 
-    rank: Union[int, str]
+    id: str
+    rank: int
     score: Union[float, int]
 
 

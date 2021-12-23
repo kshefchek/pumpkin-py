@@ -89,15 +89,12 @@ tmp/hp-labels.tsv: FORCE | tmp/
 closures/upheno-1.owl: FORCE | closures/
 	$(ROBOT) \
 	  merge \
-	    --input-iri https://data.monarchinitiative.org/upheno2/current/upheno-release/all/upheno_old_metazoa.owl \
+	    --input-iri https://bbop-ontologies.s3.amazonaws.com/upheno/current/upheno-release/all/upheno_old_metazoa.owl \
  	  remove \
 	    --axioms "disjoint" \
 	  remove \
 	    --term owl:Nothing \
 	    --term rdfs:comment \
-	  reason \
-	    --reasoner ELK \
-	    --axiom-generators "SubClass EquivalentClass" \
 	  remove \
 	    --select "anonymous individuals <http://purl.obolibrary.org/obo/IAO*> <http://www.geneontology.org/formats/oboInOwl*>" \
 	    --output $@
@@ -105,15 +102,12 @@ closures/upheno-1.owl: FORCE | closures/
 closures/upheno-2.owl: FORCE | closures/
 	$(ROBOT) \
 	  merge \
-	    --input-iri https://data.monarchinitiative.org/upheno2/current/upheno-release/all/upheno_lattice_model.owl \
+	    --input-iri https://bbop-ontologies.s3.amazonaws.com/upheno/current/upheno-release/all/upheno_lattice_model.owl \
  	  remove \
 	    --axioms "disjoint" \
 	  remove \
 	    --term owl:Nothing \
 	    --term rdfs:comment \
-	  reason \
-	    --reasoner ELK \
-	    --axiom-generators "SubClass EquivalentClass" \
 	  remove \
 	    --select "anonymous individuals <http://purl.obolibrary.org/obo/IAO*> <http://www.geneontology.org/formats/oboInOwl*>" \
 	    --output $@
